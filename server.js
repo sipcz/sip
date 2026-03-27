@@ -22,4 +22,9 @@ app.use("/api/taxi", taxiRoute); // ← ТЕПЕР ПРАВИЛЬНО
 // 4. Запускаємо сервер
 app.listen(3000, () => {
     console.log("Server running on port 3000");
+    setInterval(() => {
+    fetch("https://sip-lo83.onrender.com/")
+        .then(() => console.log("Keep-alive ping"))
+        .catch(() => console.log("Ping failed"));
+}, 5 * 60 * 1000); // кожні 5 хвилин
 });
