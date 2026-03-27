@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel — AutoSale Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .admin-container { padding-top: 120px; text-align: center; }
+        .admin-box { width: 400px; margin: 20px auto; background: var(--card-bg); padding: 20px; border-radius: 10px; }
+        .admin-box input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: none; }
+        .admin-box button { padding: 10px 20px; background: var(--accent); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .car-list-admin { margin-top: 30px; }
+        .car-item { background: var(--card-bg); padding: 15px; margin: 10px auto; width: 400px; border-radius: 10px; }
+        .car-item button { background: red; color: white; margin-top: 10px; }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <a href="index.html">← Назад на сайт</a>
+</nav>
+
+<div class="admin-container">
+
+    <!-- ЛОГІН -->
+    <div id="loginBox">
+        <input type="password" id="adminPass" placeholder="Пароль">
+        <button onclick="login()">Увійти</button>
+    </div>
+
+    <!-- АДМІН ПАНЕЛЬ -->
+    <div id="adminPanel" style="display:none;">
+
+        <div class="admin-box">
+            <h2>Додати авто</h2>
+
+            <input id="carName" placeholder="Назва авто">
+            <input id="carBrand" placeholder="Марка (BMW, Audi...)">
+            <input id="carYear" placeholder="Рік">
+            <input id="carPrice" placeholder="Ціна (€)">
+            <input id="carImg" placeholder="assets/img/car4.jpg">
+
+            <button onclick="addCar()">Додати</button>
+        </div>
+
+        <h2>Список авто</h2>
+        <div id="adminCarList" class="car-list-admin"></div>
+
+    </div>
+
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

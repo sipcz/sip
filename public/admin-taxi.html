@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Адмін — Таксі</title>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: Arial;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        td, th {
+            border: 1px solid #444;
+            padding: 10px;
+        }
+        th {
+            background: #222;
+        }
+        button {
+            padding: 6px 12px;
+            background: #d4af37;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Адмін-панель Таксі</h1>
+
+<label>Пароль:</label>
+<input type="password" id="pass">
+<button onclick="loadData()">Увійти</button>
+
+<table id="table" style="display:none;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Ім'я</th>
+            <th>Телефон</th>
+            <th>Адреса</th>
+            <th>Коментар</th>
+            <th>Час</th>
+            <th>IP</th>
+            <th>Дія</th>
+        </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+</table>
+
+<script>
+async function loadData() {
+    const pass = document.getElementById("pass").value;
+
+    const res = await fetch(`/api/taxi/admin?pass=${pass}`);
+    if (!res.ok) {
+        alert("Невірний пароль");
+        return;
+    }
+
+    const data = await res.json();
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    data.forEach((item, i) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${i}</td>
+            <td>${item.name}</td>
+            <td>${item.phone}</td>
+            <td>${item.address}</td>
+            <td>${item.comment}</td>
+            <td>${item.time}</td>
+            <td>${item.ip}</td>
+            <td><button onclick="del(${i})">Видалити</button></td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("table").style.display = "table";
+}
+
+async function del(index) {
+    const pass = document.getElementById("pass").value;
+
+    const res = await fetch("/api/taxi/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pass, index })
+    });
+
+    const msg = await res.text();
+    alert(msg);
+    loadData();
+}
+</script>
+
+</body>
+</html>

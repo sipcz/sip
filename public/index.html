@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoSale Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #000;
+            --text: #fff;
+            --accent: #d4af37;
+            --card-bg: rgba(0,0,0,0.65);
+        }
+
+        .light-theme {
+            --bg: #f5f5f5;
+            --text: #111;
+            --accent: #b8860b;
+            --card-bg: rgba(255,255,255,0.7);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            transition: 0.3s;
+        }
+
+        /* Відео-фон */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.45);
+        }
+
+        /* Меню */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            z-index: 10;
+        }
+
+        nav .logo {
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 0 0 10px black;
+        }
+
+        nav .menu a {
+            color: var(--text);
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 18px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        nav .menu a:hover {
+            color: var(--accent);
+        }
+
+        nav .menu a::after {
+            content: "";
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent);
+            transition: 0.3s;
+        }
+
+        nav .menu a:hover::after {
+            width: 100%;
+        }
+
+        .burger {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        /* Мобільне меню */
+        @media (max-width: 768px) {
+            nav {
+                justify-content: space-between;
+                padding: 15px 20px;
+            }
+
+            .menu {
+                position: absolute;
+                top: 70px;
+                right: 0;
+                background: rgba(0,0,0,0.85);
+                width: 200px;
+                padding: 20px;
+                display: none;
+                flex-direction: column;
+                text-align: right;
+            }
+
+            .menu a {
+                margin: 10px 0;
+                font-size: 20px;
+            }
+
+            .burger {
+                display: block;
+            }
+        }
+
+        /* Контент */
+        .content {
+            padding-top: 120px;
+            text-align: center;
+            background: rgba(0,0,0,0.45);
+            min-height: 100vh;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 48px;
+            color: var(--accent);
+            text-shadow: 0 0 10px black;
+        }
+
+        p {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Відео на фоні -->
+<div class="video-bg">
+    <video autoplay muted loop playsinline>
+        <source src="video/video.mp4" type="video/mp4">
+    </video>
+</div>
+
+<!-- Меню -->
+<nav>
+    <div class="logo">AutoSale</div>
+
+    <div class="menu">
+        <a href="#home">Головна</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#about">Про нас</a>
+        <a href="#services">Послуги</a>
+        <a href="#contact">Контакти</a>
+        <a href="#taxi">Таксі</a>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">Тема</button>
+    <div class="burger" onclick="toggleMenu()">☰</div>
+</nav>
+
+<!-- Головна -->
+<div class="content" id="home">
+    <h1>AutoSale Premium</h1>
+    <p>Елітні автомобілі. Преміальний сервіс.</p>
+</div>
+
+<!-- Каталог -->
+<div class="content" id="catalog">
+    <h1>Каталог авто</h1>
+
+    <div id="carsContainer"
+         style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;">
+    </div>
+</div>
+
+<!-- Про нас -->
+<div class="content" id="about">
+    <h1>Про нас</h1>
+    <p>AutoSale Premium — це сервіс преміального рівня з продажу автомобілів з Європи.
+       Ми працюємо тільки з перевіреними постачальниками та гарантуємо якість кожного авто.</p>
+</div>
+
+<!-- Послуги -->
+<div class="content" id="services">
+    <h1>Наші послуги</h1>
+    <p>✔ Підбір авто під ваш бюджет<br>
+       ✔ Перевірка авто по VIN<br>
+       ✔ Доставка з Європи<br>
+       ✔ Розмитнення та оформлення документів<br>
+       ✔ Гарантія прозорості та безпеки</p>
+</div>
+
+<!-- Контакти -->
+<div class="content" id="contact">
+    <h1>Контакти</h1>
+    <p>Телефон: +380 ХХХ ХХХ ХХ ХХ<br>
+       Email: autosale@gmail.com<br>
+       Локація: Україна / Європа</p>
+</div>
+<!-- Таксі -->
+<div class="content" id="taxi">
+    <h1>Виклик таксі</h1>
+
+    <form id="taxiForm" style="max-width:400px; margin:auto; text-align:left;">
+
+    <!-- 🛡️ Антибот-поле (honeypot) -->
+    <input type="text" id="secret" name="secret" style="display:none">
+
+    <label>Ваше ім'я:</label>
+    <input type="text" id="name" required style="width:100%; padding:10px; margin-bottom:10px;">
+
+    <label>Телефон:</label>
+    <input type="text" id="phone" required style="width:100%; padding:10px; margin-bottom:10px;">
+
+    <label>Адреса подачі:</label>
+    <input type="text" id="address" required style="width:100%; padding:10px; margin-bottom:10px;">
+
+    <label>Коментар:</label>
+    <textarea id="comment" style="width:100%; padding:10px; margin-bottom:10px;"></textarea>
+
+    <button type="submit" style="
+        width:100%; padding:12px; background:var(--accent); 
+        border:none; color:black; font-weight:bold; cursor:pointer;
+        border-radius:5px;">
+        Викликати таксі
+    </button>
+</form>
+
+
+
+    <p id="taxiStatus" style="margin-top:20px; font-size:22px; color:var(--accent);"></p>
+</div>
+
+<script>
+function toggleTheme() {
+    document.body.classList.toggle("light-theme");
+}
+
+function toggleMenu() {
+    const menu = document.querySelector(".menu");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+async function loadCarsForSite() {
+    const res = await fetch("/api/cars/public");
+    const cars = await res.json();
+
+    const container = document.getElementById("carsContainer");
+    container.innerHTML = "";
+
+    cars.forEach(car => {
+        const div = document.createElement("div");
+        div.style.width = "300px";
+        div.style.background = "var(--card-bg)";
+        div.style.padding = "15px";
+        div.style.borderRadius = "10px";
+        div.style.backdropFilter = "blur(6px)";
+        div.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+
+        div.innerHTML = `
+            <img src="${car.img}" style="width:100%; border-radius:10px;">
+            <h3 style="color:var(--accent); margin:10px 0 5px;">${car.name}</h3>
+            <p>${car.brand} — ${car.year}</p>
+            <p style="font-size:20px; color:var(--accent); font-weight:bold;">
+                ${car.price}€
+            </p>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+loadCarsForSite();
+
+
+// 🔥 Ось тут вставляється твій код таксі
+document.getElementById("taxiForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value,
+        comment: document.getElementById("comment").value
+    };
+
+    const res = await fetch("/api/taxi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    const msg = await res.text();
+    document.getElementById("taxiStatus").innerText = msg;
+});
+</script>
+
+</body>
+</html>
