@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>AutoSale Premium | Виклик таксі</title>
+    <title>AutoSale Premium</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -10,97 +10,148 @@
             --bg: #000;
             --text: #fff;
             --accent: #d4af37;
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --input-bg: rgba(255, 255, 255, 0.05);
+            --card-bg: rgba(0,0,0,0.65);
+            --input-bg: rgba(255, 255, 255, 0.1);
         }
+
+        .light-theme {
+            --bg: #f5f5f5;
+            --text: #111;
+            --accent: #b8860b;
+            --card-bg: rgba(255,255,255,0.7);
+            --input-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
+            transition: 0.3s;
+            overflow-x: hidden;
         }
+
+        html { scroll-behavior: smooth; }
 
         /* Відео-фон */
         .video-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
         }
+
         .video-bg video {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
-            filter: brightness(0.3);
+            filter: brightness(0.4);
         }
 
-        /* Контент */
-        .container {
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--accent);
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* ВИПРАВЛЕННЯ ЗМІЩЕННЯ (Flexbox Layout) */
-        .form-group {
+        /* Меню */
+        nav {
+            position: fixed;
+            top: 0; width: 100%; padding: 15px 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
             display: flex;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
+            gap: 40px;
+            z-index: 100;
         }
 
-        .form-group label {
-            width: 130px; /* Фіксована ширина для всіх підписів */
-            min-width: 130px;
+        nav .logo {
+            font-size: 26px;
+            font-weight: bold;
             color: var(--accent);
-            font-size: 14px;
+            text-shadow: 0 0 10px black;
+        }
+
+        nav .menu { display: flex; align-items: center; }
+
+        nav .menu a {
+            color: var(--text);
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav .menu a:hover { color: var(--accent); }
+
+        .theme-toggle {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
             font-weight: bold;
         }
 
-        .form-group input, 
-        .form-group textarea {
-            flex: 1; /* Займає весь вільний простір */
-            background: var(--input-bg);
-            border: 1px solid rgba(212, 175, 55, 0.5);
-            padding: 10px;
-            color: #fff;
-            border-radius: 5px;
-            outline: none;
-            transition: 0.3s;
-            box-sizing: border-box;
+        .burger { display: none; font-size: 28px; cursor: pointer; color: var(--accent); }
+
+        /* Секції контенту */
+        .content {
+            padding: 120px 20px 60px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .form-group input:focus, 
-        .form-group textarea:focus {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+        h1 { font-size: 42px; color: var(--accent); text-shadow: 0 0 10px black; margin-bottom: 20px; }
+
+        /* ФОРМА ТАКСІ - ВИПРАВЛЕННЯ ЗМІЩЕННЯ */
+        .taxi-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            width: 100%;
+            max-width: 450px;
         }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-row label {
+            width: 120px; /* Фіксована ширина лікує зміщення */
+            min-width: 120px;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-row input, .form-row textarea {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-row input:focus { border-color: var(--accent); }
 
         /* Антибот */
         .antibot-box {
-            background: rgba(212, 175, 55, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
             margin: 20px 0;
+            padding: 15px;
             border: 1px dashed var(--accent);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
         }
 
         .antibot-box label {
@@ -110,25 +161,26 @@
         }
 
         #bot-letters {
-            background: #fff;
+            background: var(--accent);
             color: #000;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 4px;
             font-family: monospace;
             font-size: 20px;
-            letter-spacing: 4px;
-            margin: 0 5px;
+            letter-spacing: 3px;
         }
 
         #antibot {
-            width: 60px;
+            width: 70px;
             text-align: center;
             font-size: 18px;
             padding: 5px;
-            text-transform: uppercase;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
         }
 
-        /* Кнопка */
         .submit-btn {
             width: 100%;
             padding: 15px;
@@ -136,37 +188,30 @@
             color: #000;
             border: none;
             font-weight: bold;
-            font-size: 16px;
-            border-radius: 5px;
+            text-transform: uppercase;
+            border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
         }
 
-        .submit-btn:hover {
-            background: #f1c40f;
-            transform: translateY(-2px);
-        }
-
-        #taxiStatus {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
-            min-height: 24px;
-        }
+        .submit-btn:hover { transform: scale(1.02); background: #f1c40f; }
 
         /* Мобільна версія */
-        @media (max-width: 600px) {
-            .form-group {
-                flex-direction: column;
-                align-items: flex-start;
+        @media (max-width: 768px) {
+            nav { justify-content: space-between; padding: 15px 20px; }
+            .menu {
+                display: none; position: absolute; top: 70px; right: 0;
+                background: rgba(0,0,0,0.9); width: 200px; flex-direction: column;
+                padding: 20px; border-radius: 0 0 0 10px;
             }
-            .form-group label {
-                margin-bottom: 5px;
-                width: 100%;
-            }
+            .menu.active { display: flex; }
+            .burger { display: block; }
+            .form-row { flex-direction: column; align-items: flex-start; }
+            .form-row label { margin-bottom: 5px; width: 100%; }
         }
     </style>
 </head>
+
 <body>
 
 <div class="video-bg">
@@ -175,57 +220,88 @@
     </video>
 </div>
 
-<div class="container">
+<nav>
+    <div class="logo">AutoSale</div>
+    <div class="menu" id="navMenu">
+        <a href="#home">Головна</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#services">Послуги</a>
+        <a href="#taxi">Таксі</a>
+        <a href="#contact">Контакти</a>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Тема</button>
+    <div class="burger" onclick="toggleMenu()">☰</div>
+</nav>
+
+<div class="content" id="home">
+    <h1>AutoSale Premium</h1>
+    <p style="font-size: 20px;">Елітні автомобілі. Преміальний сервіс.</p>
+</div>
+
+<div class="content" id="taxi">
     <h1>Виклик таксі</h1>
+    
+    <div class="taxi-container">
+        <form id="taxiForm">
+            <input type="text" name="secret" style="display:none">
 
-    <form id="taxiForm">
-        <input type="text" name="secret" style="display:none">
+            <div class="form-row">
+                <label>Ваше ім'я:</label>
+                <input type="text" name="name" placeholder="Введіть ім'я" required>
+            </div>
 
-        <div class="form-group">
-            <label>Ваше ім'я:</label>
-            <input type="text" name="name" placeholder="Олександр" required>
-        </div>
+            <div class="form-row">
+                <label>Телефон:</label>
+                <input type="tel" name="phone" placeholder="+380..." required>
+            </div>
 
-        <div class="form-group">
-            <label>Телефон:</label>
-            <input type="tel" name="phone" placeholder="+380..." required>
-        </div>
+            <div class="form-row">
+                <label>Адреса:</label>
+                <input type="text" name="address" placeholder="Куди подати авто?" required>
+            </div>
 
-        <div class="form-group">
-            <label>Адреса подачі:</label>
-            <input type="text" name="address" placeholder="вул. Хрещатик, 1" required>
-        </div>
+            <div class="form-row">
+                <label>Коментар:</label>
+                <textarea name="comment" rows="2" placeholder="Напр: бізнес-клас"></textarea>
+            </div>
 
-        <div class="form-group">
-            <label>Коментар:</label>
-            <textarea name="comment" rows="3" placeholder="Додаткові побажання..."></textarea>
-        </div>
+            <div class="antibot-box" id="captchaBox">
+                <label>🔐 Антибот: введіть <span id="bot-letters">--</span></label>
+                <input type="text" id="antibot" name="antibot" maxlength="2" required>
+            </div>
 
-        <div class="antibot-box" id="antibotContainer">
-            <label>🔐 Підтвердіть: введіть <span id="bot-letters">--</span></label>
-            <input type="text" id="antibot" name="antibot" maxlength="2" required>
-        </div>
-
-        <button type="submit" class="submit-btn">ВІДПРАВИТИ ЗАЯВКУ 🚕</button>
-        <div id="taxiStatus"></div>
-    </form>
+            <button type="submit" class="submit-btn">Замовити таксі 🚕</button>
+        </form>
+        <p id="taxiStatus" style="margin-top:15px; font-weight:bold; color:var(--accent);"></p>
+    </div>
 </div>
 
 <script>
+// --- ЛОГІКА МЕНЮ ТА ТЕМИ ---
+function toggleTheme() {
+    document.body.classList.toggle("light-theme");
+}
+
+function toggleMenu() {
+    document.getElementById("navMenu").classList.toggle("active");
+}
+
+// Закриття меню при кліку на посилання (для мобілок)
+document.querySelectorAll('.menu a').forEach(link => {
+    link.onclick = () => document.getElementById("navMenu").classList.remove("active");
+});
+
+// --- ЛОГІКА АНТИБОТА ТА ВІДПРАВКИ ---
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("taxiForm");
     const botLettersEl = document.getElementById("bot-letters");
-    const statusEl = document.getElementById("taxiStatus");
 
-    // 1. Генерація Антибота
     function generateCaptcha() {
         const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-        const code = letters[Math.floor(Math.random() * letters.length)] +
+        const code = letters[Math.floor(Math.random() * letters.length)] + 
                      letters[Math.floor(Math.random() * letters.length)];
-        
         botLettersEl.innerText = code;
-
-        // Оновлюємо або створюємо приховане поле для перевірки на бекенді
+        
         let hidden = form.querySelector('input[name="expected"]');
         if (!hidden) {
             hidden = document.createElement("input");
@@ -238,24 +314,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     generateCaptcha();
 
-    // 2. Перевірка на WhiteList (щоб сховати антибот)
+    // Перевірка Whitelist
     fetch("/api/taxi/check-ip")
         .then(r => r.json())
         .then(data => {
-            if (data.whitelisted) {
-                document.getElementById("antibotContainer").style.display = "none";
-                document.getElementById("antibot").removeAttribute("required");
-            }
-        }).catch(e => console.log("Check IP failed"));
+            if (data.whitelisted) document.getElementById("captchaBox").style.display = "none";
+        }).catch(() => {});
 
-    // 3. Відправка форми
-    form.addEventListener("submit", async (e) => {
+    // Відправка форми
+    form.onsubmit = async (e) => {
         e.preventDefault();
-        statusEl.style.color = "var(--accent)";
-        statusEl.innerText = "Обробка запиту...";
+        const status = document.getElementById("taxiStatus");
+        status.innerText = "Відправка...";
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+        const data = Object.fromEntries(new FormData(form).entries());
 
         try {
             const res = await fetch("/api/taxi", {
@@ -263,23 +335,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             });
-
-            const resultText = await res.text();
-
+            const text = await res.text();
+            status.innerText = text;
             if (res.ok) {
-                statusEl.style.color = "#2ecc71";
-                statusEl.innerText = "✅ " + resultText;
                 form.reset();
                 generateCaptcha();
-            } else {
-                statusEl.style.color = "#e74c3c";
-                statusEl.innerText = "❌ " + resultText;
             }
         } catch (err) {
-            statusEl.style.color = "#e74c3c";
-            statusEl.innerText = "⚠️ Помилка з'єднання з сервером";
+            status.innerText = "Помилка мережі";
         }
-    });
+    };
 });
 </script>
 
