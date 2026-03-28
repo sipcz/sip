@@ -1,186 +1,92 @@
 import express from "express";
 import axios from "axios";
-import fs from "fs";
+import { promises as fs } from "fs"; // Асинхронний FS
 
 const router = express.Router();
 
 const BOT_TOKEN = "8381037035:AAGhfS8LbZQCgPf_oAVyvG9tXDLtfAxGVug";
 const CHAT_ID = "8257665442";
 const ADMIN_PASSWORD = "pedro2026";
+const LOG_FILE = "./taxi-log.json";
 
-// ===== МІДЛВЕРА ДЛЯ ПРАВИЛЬНОГО IP =====
+// Ініціалізація логів
+async function initLogs() {
+    try {
+        await fs.access(LOG_FILE);
+    } catch {
+        await fs.writeFile(LOG_FILE, "[]");
+    }
+}
+initLogs();
+
+// Мідлвера IP
 router.use((req, res, next) => {
-    req.realIp =
-        req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
-        req.connection.remoteAddress ||
-        req.ip;
-
+    req.realIp = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.ip;
     next();
 });
 
-// ===== АНТИСПАМ / WHITELIST =====
-
-const WHITELIST = new Set([
-    "::1",
-    "127.0.0.1",
-]);
-
-const RATE_LIMIT_IP = new Map();
-const RATE_LIMIT_PHONE = new Map();
+const WHITELIST = new Set(["::1", "127.0.0.1"]);
 const BLOCKED = new Map();
 const ATTEMPTS = new Map();
+const RATE_LIMIT_IP = new Map();
 
-const BLOCK_TIME = 5 * 60 * 1000;
-const IP_DELAY = 30 * 1000;
-const PHONE_DELAY = 60 * 1000;
-const MAX_ATTEMPTS = 5;
-
-// ===== ЛОГИ =====
-
-const LOG_FILE = "./taxi-log.json";
-
-if (!fs.existsSync(LOG_FILE)) {
-    fs.writeFileSync(LOG_FILE, "[]");
-}
-
-// ===== СЕРВІСНИЙ МАРШРУТ ДЛЯ FRONTEND (чи в whitelist) =====
-
-router.get("/check-ip", (req, res) => {
-    const ip = req.realIp;
-    res.json({ whitelisted: WHITELIST.has(ip) });
-});
-
-// ===== ОСНОВНИЙ МАРШРУТ =====
-
+// Основний роут
 router.post("/", async (req, res) => {
-    const { name, phone, address, comment, secret, antibot, expected } = req.body;
+    const { name, phone, address, comment, antibot, expected, secret } = req.body;
     const ip = req.realIp;
     const now = Date.now();
-
-    // 0. Якщо IP у whitelist — пропускаємо антибот і антиспам
     const isWhitelisted = WHITELIST.has(ip);
 
-    // 1. Антибот (тільки якщо не whitelist)
     if (!isWhitelisted) {
-        if (!antibot || !expected || antibot.toUpperCase() !== expected.toUpperCase()) {
-            return res.status(400).send("Антибот: неправильні букви.");
+        // 1. Антибот
+        if (!antibot || antibot.toUpperCase() !== (expected || "").toUpperCase()) {
+            return res.status(400).send("Помилка: Неправильний код антибота.");
+        }
+
+        // 2. Блокування IP
+        if (BLOCKED.has(ip) && now < BLOCKED.get(ip)) {
+            return res.status(403).send("Ви заблоковані за спам. Спробуйте пізніше.");
+        }
+
+        // 3. Honeypot (приховане поле secret)
+        if (secret) return res.status(400).send("Bot detected");
+
+        // 4. Rate Limit (30 сек)
+        if (RATE_LIMIT_IP.has(ip) && now - RATE_LIMIT_IP.get(ip) < 30000) {
+            return res.status(429).send("Занадто часто! Почекайте 30 секунд.");
         }
     }
-
-    // 2. Антиспам (тільки якщо не whitelist)
-    if (!isWhitelisted) {
-        if (BLOCKED.has(ip)) {
-            const until = BLOCKED.get(ip);
-            if (now < until) {
-                return res.status(403).send("Ваш IP тимчасово заблоковано за спам.");
-            } else {
-                BLOCKED.delete(ip);
-                ATTEMPTS.delete(ip);
-            }
-        }
-
-        // Honeypot
-        if (secret && secret.trim() !== "") {
-            return res.status(400).send("Бот заблокований");
-        }
-
-        if (RATE_LIMIT_IP.has(ip) && now - RATE_LIMIT_IP.get(ip) < IP_DELAY) {
-            return res.status(429).send("Занадто часто! Спробуйте через 30 секунд.");
-        }
-        RATE_LIMIT_IP.set(ip, now);
-
-        if (RATE_LIMIT_PHONE.has(phone) && now - RATE_LIMIT_PHONE.get(phone) < PHONE_DELAY) {
-            return res.status(429).send("Ви вже викликали таксі. Спробуйте через хвилину.");
-        }
-        RATE_LIMIT_PHONE.set(phone, now);
-
-        const count = (ATTEMPTS.get(ip) || 0) + 1;
-        ATTEMPTS.set(ip, count);
-
-        if (count >= MAX_ATTEMPTS) {
-            BLOCKED.set(ip, now + BLOCK_TIME);
-            ATTEMPTS.delete(ip);
-            return res.status(403).send("Ваш IP тимчасово заблоковано за спам.");
-        }
-    }
-
-    // ===== ЛОГИ =====
-
-    const logEntry = {
-        time: new Date().toISOString(),
-        name,
-        phone,
-        address,
-        comment,
-        ip
-    };
-
-    const logs = JSON.parse(fs.readFileSync(LOG_FILE));
-    logs.push(logEntry);
-    fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
-
-    // ===== TELEGRAM =====
-
-    const text = `
-🚕 *Новий виклик таксі!*
-
-👤 Ім'я: ${name}
-📞 Телефон: ${phone}
-📍 Адреса: ${address}
-💬 Коментар: ${comment || "немає"}
-
-IP: ${ip}
-    `;
 
     try {
-        await axios.post(
-            `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-            {
-                chat_id: CHAT_ID,
-                text,
-                parse_mode: "Markdown"
-            }
-        );
+        // Запис логів (Асинхронно)
+        const fileData = await fs.readFile(LOG_FILE, "utf-8");
+        const logs = JSON.parse(fileData);
+        logs.push({ time: new Date().toLocaleString(), name, phone, address, comment, ip });
+        await fs.writeFile(LOG_FILE, JSON.stringify(logs, null, 2));
 
-        res.send("Таксі успішно викликано! Ми вже їдемо 🚕");
+        // Telegram
+        const text = `🚕 *Новий виклик!*\n\n👤 Ім'я: ${name}\n📞 Тел: ${phone}\n📍 Адреса: ${address}\n💬 Коментар: ${comment || "-"}\n\n🌐 IP: ${ip}`;
+        
+        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            chat_id: CHAT_ID,
+            text,
+            parse_mode: "Markdown"
+        });
+
+        RATE_LIMIT_IP.set(ip, now);
+        res.send("Таксі успішно викликано! 🚕");
+
     } catch (err) {
-        console.log(err);
-        res.status(500).send("Помилка при відправці повідомлення");
+        console.error("Помилка:", err.message);
+        res.status(500).send("Помилка сервера. Спробуйте ще раз.");
     }
 });
 
-// ===== АДМІН-ПАНЕЛЬ =====
-
-router.get("/admin", (req, res) => {
-    const pass = req.query.pass;
-
-    if (pass !== ADMIN_PASSWORD) {
-        return res.status(403).send("Доступ заборонено");
-    }
-
-    const logs = JSON.parse(fs.readFileSync(LOG_FILE));
-    res.json(logs);
-});
-
-// ===== ВИДАЛЕННЯ ЗАЯВКИ =====
-
-router.post("/delete", (req, res) => {
-    const { pass, index } = req.body;
-
-    if (pass !== ADMIN_PASSWORD) {
-        return res.status(403).send("Доступ заборонено");
-    }
-
-    const logs = JSON.parse(fs.readFileSync(LOG_FILE));
-
-    if (index < 0 || index >= logs.length) {
-        return res.status(400).send("Невірний індекс");
-    }
-
-    logs.splice(index, 1);
-    fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
-
-    res.send("Заявку видалено");
+// Адмін-панель
+router.get("/admin", async (req, res) => {
+    if (req.query.pass !== ADMIN_PASSWORD) return res.status(403).send("Доступ заборонено");
+    const logs = await fs.readFile(LOG_FILE, "utf-8");
+    res.json(JSON.parse(logs));
 });
 
 export default router;
