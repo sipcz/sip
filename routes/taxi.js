@@ -6,74 +6,87 @@ const router = express.Router();
 
 const BOT_TOKEN = "8381037035:AAGhfS8LbZQCgPf_oAVyvG9tXDLtfAxGVug";
 const CHAT_ID = "8257665442";
-const ADMIN_PASSWORD = "pedro2026"; // зміни на свій
+const ADMIN_PASSWORD = "pedro2026";
 
-// Антиспам карти
-const ipLimit = new Map();
-const phoneLimit = new Map();
-const blockedIPs = new Map(); // IP → час блокування
+// ===== АНТИСПАМ =====
 
-// Файл для логів
+// Whitelist — твої IP ніколи не блокуються
+const WHITELIST = new Set([
+    "::1",
+    "127.0.0.1",
+]);
+
+// Ліміти
+const RATE_LIMIT_IP = new Map();      // IP → timestamp
+const RATE_LIMIT_PHONE = new Map();   // phone → timestamp
+const BLOCKED = new Map();            // IP → blockUntil timestamp
+const ATTEMPTS = new Map();           // IP → count
+
+// Налаштування
+const BLOCK_TIME = 5 * 60 * 1000;     // 5 хвилин
+const IP_DELAY = 30 * 1000;           // 30 сек
+const PHONE_DELAY = 60 * 1000;        // 60 сек
+const MAX_ATTEMPTS = 5;               // після 5 спроб — блок
+
+// ===== ЛОГИ =====
+
 const LOG_FILE = "./taxi-log.json";
 
-// Створюємо файл, якщо його немає
 if (!fs.existsSync(LOG_FILE)) {
     fs.writeFileSync(LOG_FILE, "[]");
 }
 
+// ===== ОСНОВНИЙ МАРШРУТ =====
+
 router.post("/", async (req, res) => {
     const { name, phone, address, comment, secret } = req.body;
-
-    const now = Date.now();
     const ip = req.ip;
+    const now = Date.now();
 
-    // 🛡️ 0. Перевірка блокування IP
-    if (blockedIPs.has(ip)) {
-        const blockTime = blockedIPs.get(ip);
+    // 0. Whitelist
+    if (!WHITELIST.has(ip)) {
 
-        if (now - blockTime < 300000) {
+        // 1. Перевірка блокування
+        if (BLOCKED.has(ip)) {
+            const until = BLOCKED.get(ip);
+            if (now < until) {
+                return res.status(403).send("Ваш IP тимчасово заблоковано за спам.");
+            } else {
+                BLOCKED.delete(ip);
+                ATTEMPTS.delete(ip);
+            }
+        }
+
+        // 2. Honeypot
+        if (secret && secret.trim() !== "") {
+            return res.status(400).send("Бот заблокований");
+        }
+
+        // 3. Rate limit по IP
+        if (RATE_LIMIT_IP.has(ip) && now - RATE_LIMIT_IP.get(ip) < IP_DELAY) {
+            return res.status(429).send("Занадто часто! Спробуйте через 30 секунд.");
+        }
+        RATE_LIMIT_IP.set(ip, now);
+
+        // 4. Rate limit по телефону
+        if (RATE_LIMIT_PHONE.has(phone) && now - RATE_LIMIT_PHONE.get(phone) < PHONE_DELAY) {
+            return res.status(429).send("Ви вже викликали таксі. Спробуйте через хвилину.");
+        }
+        RATE_LIMIT_PHONE.set(phone, now);
+
+        // 5. Лічильник спроб
+        const count = (ATTEMPTS.get(ip) || 0) + 1;
+        ATTEMPTS.set(ip, count);
+
+        if (count >= MAX_ATTEMPTS) {
+            BLOCKED.set(ip, now + BLOCK_TIME);
+            ATTEMPTS.delete(ip);
             return res.status(403).send("Ваш IP тимчасово заблоковано за спам.");
-        } else {
-            blockedIPs.delete(ip);
         }
     }
 
-    // 🛡️ 1. Антибот (honeypot)
-    if (secret && secret.trim() !== "") {
-        console.log("Бот заблокований:", ip);
-        return res.status(400).send("Бот заблокований");
-    }
+    // ===== ЗБЕРЕЖЕННЯ ЛОГА =====
 
-    // 🛡️ 2. Антиспам по IP (30 сек)
-    if (ipLimit.has(ip) && now - ipLimit.get(ip) < 300000) {
-        return res.status(429).send("Занадто часто! Спробуйте через 300 секунд.");
-    }
-    ipLimit.set(ip, now);
-
-    // 🛡️ 3. Антиспам по телефону (60 сек)
-    if (phoneLimit.has(phone) && now - phoneLimit.get(phone) < 120000) {
-        return res.status(429).send("Ви вже викликали таксі. Спробуйте через 2 хвилини.");
-    }
-    phoneLimit.set(phone, now);
-
-    // 🛡️ 4. Лічильник спроб для блокування IP
-    if (!blockedIPs.has(ip + "_count")) {
-        blockedIPs.set(ip + "_count", 0);
-    }
-
-    let attempts = blockedIPs.get(ip + "_count");
-    attempts++;
-
-    if (attempts >= 5) {
-        blockedIPs.set(ip, now);
-        blockedIPs.delete(ip + "_count");
-        console.log("IP заблоковано на 24 години:", ip);
-        return res.status(403).send("Ваш IP заблоковано за спам.");
-    }
-
-    blockedIPs.set(ip + "_count", attempts);
-
-    // 📝 5. Збереження заявки у файл
     const logEntry = {
         time: new Date().toISOString(),
         name,
@@ -87,7 +100,8 @@ router.post("/", async (req, res) => {
     logs.push(logEntry);
     fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
 
-    // 📩 6. Повідомлення в Telegram
+    // ===== ВІДПРАВКА В TELEGRAM =====
+
     const text = `
 🚕 *Новий виклик таксі!*
 
@@ -116,7 +130,8 @@ IP: ${ip}
     }
 });
 
-// 🛡️ 7. Адмін‑панель (JSON API)
+// ===== АДМІН-ПАНЕЛЬ =====
+
 router.get("/admin", (req, res) => {
     const pass = req.query.pass;
 
@@ -128,7 +143,8 @@ router.get("/admin", (req, res) => {
     res.json(logs);
 });
 
-// 🗑 Видалення заявки
+// ===== ВИДАЛЕННЯ ЗАЯВКИ =====
+
 router.post("/delete", (req, res) => {
     const { pass, index } = req.body;
 
