@@ -46,13 +46,13 @@ router.post("/", async (req, res) => {
 
     // 🛡️ 2. Антиспам по IP (30 сек)
     if (ipLimit.has(ip) && now - ipLimit.get(ip) < 300000) {
-        return res.status(429).send("Занадто часто! Спробуйте через 30 секунд.");
+        return res.status(429).send("Занадто часто! Спробуйте через 300 секунд.");
     }
     ipLimit.set(ip, now);
 
     // 🛡️ 3. Антиспам по телефону (60 сек)
-    if (phoneLimit.has(phone) && now - phoneLimit.get(phone) < 60000) {
-        return res.status(429).send("Ви вже викликали таксі. Спробуйте через хвилину.");
+    if (phoneLimit.has(phone) && now - phoneLimit.get(phone) < 120000) {
+        return res.status(429).send("Ви вже викликали таксі. Спробуйте через 2 хвилини.");
     }
     phoneLimit.set(phone, now);
 
