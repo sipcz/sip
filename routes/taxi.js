@@ -18,25 +18,22 @@ router.use((req, res, next) => {
     next();
 });
 
-// ===== АНТИСПАМ =====
+// ===== АНТИСПАМ / WHITELIST =====
 
-// Whitelist — твої IP ніколи не блокуються
 const WHITELIST = new Set([
     "::1",
     "127.0.0.1",
 ]);
 
-// Ліміти
-const RATE_LIMIT_IP = new Map();      // IP → timestamp
-const RATE_LIMIT_PHONE = new Map();   // phone → timestamp
-const BLOCKED = new Map();            // IP → blockUntil timestamp
-const ATTEMPTS = new Map();           // IP → count
+const RATE_LIMIT_IP = new Map();
+const RATE_LIMIT_PHONE = new Map();
+const BLOCKED = new Map();
+const ATTEMPTS = new Map();
 
-// Налаштування
-const BLOCK_TIME = 5 * 60 * 1000;     // 5 хвилин
-const IP_DELAY = 30 * 1000;           // 30 сек
-const PHONE_DELAY = 60 * 1000;        // 60 сек
-const MAX_ATTEMPTS = 5;               // після 5 спроб — блок
+const BLOCK_TIME = 5 * 60 * 1000;
+const IP_DELAY = 30 * 1000;
+const PHONE_DELAY = 60 * 1000;
+const MAX_ATTEMPTS = 5;
 
 // ===== ЛОГИ =====
 
@@ -46,22 +43,32 @@ if (!fs.existsSync(LOG_FILE)) {
     fs.writeFileSync(LOG_FILE, "[]");
 }
 
+// ===== СЕРВІСНИЙ МАРШРУТ ДЛЯ FRONTEND (чи в whitelist) =====
+
+router.get("/check-ip", (req, res) => {
+    const ip = req.realIp;
+    res.json({ whitelisted: WHITELIST.has(ip) });
+});
+
 // ===== ОСНОВНИЙ МАРШРУТ =====
 
 router.post("/", async (req, res) => {
-    const { name, phone, address, comment, secret, antibot } = req.body;
+    const { name, phone, address, comment, secret, antibot, expected } = req.body;
     const ip = req.realIp;
     const now = Date.now();
 
-    // 0. Антибот — 2 букви
-    if (!antibot || antibot.toUpperCase() !== "AB") {
-        return res.status(400).send("Антибот: введіть правильні 2 букви.");
+    // 0. Якщо IP у whitelist — пропускаємо антибот і антиспам
+    const isWhitelisted = WHITELIST.has(ip);
+
+    // 1. Антибот (тільки якщо не whitelist)
+    if (!isWhitelisted) {
+        if (!antibot || !expected || antibot.toUpperCase() !== expected.toUpperCase()) {
+            return res.status(400).send("Антибот: неправильні букви.");
+        }
     }
 
-    // 0.5 Whitelist
-    if (!WHITELIST.has(ip)) {
-
-        // 1. Перевірка блокування
+    // 2. Антиспам (тільки якщо не whitelist)
+    if (!isWhitelisted) {
         if (BLOCKED.has(ip)) {
             const until = BLOCKED.get(ip);
             if (now < until) {
@@ -72,24 +79,21 @@ router.post("/", async (req, res) => {
             }
         }
 
-        // 2. Honeypot
+        // Honeypot
         if (secret && secret.trim() !== "") {
             return res.status(400).send("Бот заблокований");
         }
 
-        // 3. Rate limit по IP
         if (RATE_LIMIT_IP.has(ip) && now - RATE_LIMIT_IP.get(ip) < IP_DELAY) {
             return res.status(429).send("Занадто часто! Спробуйте через 30 секунд.");
         }
         RATE_LIMIT_IP.set(ip, now);
 
-        // 4. Rate limit по телефону
         if (RATE_LIMIT_PHONE.has(phone) && now - RATE_LIMIT_PHONE.get(phone) < PHONE_DELAY) {
             return res.status(429).send("Ви вже викликали таксі. Спробуйте через хвилину.");
         }
         RATE_LIMIT_PHONE.set(phone, now);
 
-        // 5. Лічильник спроб
         const count = (ATTEMPTS.get(ip) || 0) + 1;
         ATTEMPTS.set(ip, count);
 
@@ -100,7 +104,7 @@ router.post("/", async (req, res) => {
         }
     }
 
-    // ===== ЗБЕРЕЖЕННЯ ЛОГА =====
+    // ===== ЛОГИ =====
 
     const logEntry = {
         time: new Date().toISOString(),
@@ -115,7 +119,7 @@ router.post("/", async (req, res) => {
     logs.push(logEntry);
     fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
 
-    // ===== ВІДПРАВКА В TELEGRAM =====
+    // ===== TELEGRAM =====
 
     const text = `
 🚕 *Новий виклик таксі!*
