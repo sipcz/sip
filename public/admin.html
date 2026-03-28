@@ -1,194 +1,96 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Panel — AutoSale Premium</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+<script>
+    let CURRENT_PASS = ""; // Зберігаємо пароль тільки після успішного входу
 
-    <style>
-        :root {
-            --bg: #000;
-            --text: #fff;
-            --accent: #d4af37;
-            --card-bg: rgba(255, 255, 255, 0.07);
-            --input-bg: rgba(255, 255, 255, 0.1);
+    // ФУНКЦІЯ ВХОДУ (ІЗ ЗАХИСТОМ)
+    async function login() {
+        const passInput = document.getElementById("adminPass").value;
+        const btn = document.querySelector("#loginBox button");
+        btn.innerText = "Перевірка...";
+
+        try {
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pass: passInput })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                CURRENT_PASS = passInput; // Запам'ятовуємо пароль для подальших дій
+                document.getElementById("loginBox").style.display = "none";
+                document.getElementById("adminPanel").style.display = "block";
+                renderCars();
+            } else {
+                alert(data.error); // Виводить "Невірний пароль!" або "Заблоковано!"
+            }
+        } catch (err) {
+            alert("Помилка з'єднання з сервером.");
+        } finally {
+            btn.innerText = "Увійти";
         }
+    }
 
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            transition: 0.3s;
-            min-height: 100vh;
+    // ДОДАТИ АВТО
+    async function addCar() {
+        const car = {
+            brand: document.getElementById("carBrand").value,
+            name: document.getElementById("carName").value,
+            year: document.getElementById("carYear").value,
+            price: document.getElementById("carPrice").value,
+            img: document.getElementById("carImg").value
+        };
+
+        if (!car.name || !car.price) return alert("Заповніть назву та ціну!");
+
+        const res = await fetch('/api/cars/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ pass: CURRENT_PASS, car: car })
+        });
+
+        if (res.ok) {
+            alert("Авто додано в каталог!");
+            renderCars();
+            document.querySelectorAll('.admin-box input').forEach(i => i.value = '');
+        } else {
+            alert("Помилка доступу!");
         }
+    }
 
-        /* Відео-фон (як на головній) */
-        .video-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden;
-        }
-        .video-bg video {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            filter: brightness(0.35);
-        }
-
-        nav {
-            position: fixed;
-            top: 0; width: 100%; padding: 15px 5%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(15px);
-            z-index: 1000;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        .admin-container { 
-            padding-top: 120px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 50px;
-        }
-
-        /* Картки (Glassmorphism) */
-        .admin-box { 
-            width: 100%;
-            max-width: 450px; 
-            margin: 20px auto; 
-            background: var(--card-bg); 
-            backdrop-filter: blur(20px);
-            padding: 30px; 
-            border-radius: 20px; 
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        h2, h3 { color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            background: var(--input-bg);
-            color: white;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
-
-        button { 
-            width: 100%;
-            padding: 14px; 
-            background: var(--accent); 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 900; 
-            text-transform: uppercase;
-            color: black;
-            margin-top: 15px;
-            transition: 0.3s;
-        }
-
-        button:hover { background: white; transform: translateY(-2px); }
-
-        /* Список авто */
-        .car-list-admin { 
-            width: 100%;
-            max-width: 900px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-            padding: 0 20px;
-        }
-
-        .car-item { 
-            background: var(--card-bg); 
-            backdrop-filter: blur(10px);
-            padding: 20px; 
-            border-radius: 15px; 
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            text-align: left;
-        }
-
-        .car-item strong { color: var(--accent); font-size: 18px; display: block; margin-bottom: 5px; }
-
-        .car-item button { 
-            background: #ff4d4d; 
-            color: white; 
-            margin-top: 15px; 
-            padding: 10px;
-            font-size: 12px;
-        }
+    // ВИДАЛИТИ АВТО
+    async function deleteCar(index) {
+        if (!confirm("Дійсно видалити це авто з каталогу?")) return;
         
-        .car-item button:hover { background: white; color: black; }
+        const res = await fetch('/api/cars/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ pass: CURRENT_PASS, index: index })
+        });
 
-        @media (max-width: 500px) {
-            .admin-box { width: 90%; }
+        if (res.ok) {
+            renderCars();
+        } else {
+            alert("Помилка видалення!");
         }
-    </style>
-</head>
+    }
 
-<body>
-
-<div class="video-bg">
-    <video autoplay muted loop playsinline>
-        <source src="video/video.mp4" type="video/mp4">
-    </video>
-</div>
-
-<nav>
-    <a href="index.html">← Назад на сайт</a>
-    <div style="color: var(--accent); font-weight: bold; letter-spacing: 2px;">AUTOSALE ADMIN</div>
-</nav>
-
-<div class="admin-container">
-
-    <div id="loginBox" class="admin-box">
-        <h3>Вхід в систему</h3>
-        <input type="password" id="adminPass" placeholder="Введіть пароль">
-        <button onclick="login()">Увійти</button>
-    </div>
-
-    <div id="adminPanel" style="display:none; width: 100%;">
-
-        <div class="admin-box">
-            <h2>Додати нове авто</h2>
-
-            <input id="carName" placeholder="Назва (напр. X5)">
-            <input id="carBrand" placeholder="Марка (BMW, Audi...)">
-            <input id="carYear" placeholder="Рік випуску">
-            <input id="carPrice" placeholder="Ціна (€)">
-            <input id="carImg" placeholder="Посилання на фото (assets/img/...)">
-
-            <button onclick="addCar()">Додати в каталог</button>
-        </div>
-
-        <h2 style="text-align: center; margin-top: 40px;">Керування каталогом</h2>
-        <div id="adminCarList" class="car-list-admin"></div>
-
-    </div>
-
-</div>
-
-<script src="admin.js"></script>
-</body>
-</html>
+    // ВІДОБРАЗИТИ СПИСОК
+    async function renderCars() {
+        const list = document.getElementById("adminCarList");
+        try {
+            const res = await fetch('/api/cars/public');
+            const cars = await res.json();
+            
+            list.innerHTML = cars.map((c, i) => `
+                <div class="car-item">
+                    <img src="${c.img}" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:10px;">
+                    <strong>${c.brand} ${c.name}</strong>
+                    <div style="color:var(--accent); margin:5px 0;">Рік: ${c.year} | Ціна: ${c.price} €</div>
+                    <button onclick="deleteCar(${i})">Видалити авто</button>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = "<p>Помилка завантаження бази авто</p>";
+        }
+    }
+</script>
