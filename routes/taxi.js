@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
     if (blockedIPs.has(ip)) {
         const blockTime = blockedIPs.get(ip);
 
-        if (now - blockTime < 86400000) {
+        if (now - blockTime < 300000) {
             return res.status(403).send("Ваш IP тимчасово заблоковано за спам.");
         } else {
             blockedIPs.delete(ip);
