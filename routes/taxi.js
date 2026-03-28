@@ -49,11 +49,16 @@ if (!fs.existsSync(LOG_FILE)) {
 // ===== ОСНОВНИЙ МАРШРУТ =====
 
 router.post("/", async (req, res) => {
-    const { name, phone, address, comment, secret } = req.body;
+    const { name, phone, address, comment, secret, antibot } = req.body;
     const ip = req.realIp;
     const now = Date.now();
 
-    // 0. Whitelist
+    // 0. Антибот — 2 букви
+    if (!antibot || antibot.toUpperCase() !== "AB") {
+        return res.status(400).send("Антибот: введіть правильні 2 букви.");
+    }
+
+    // 0.5 Whitelist
     if (!WHITELIST.has(ip)) {
 
         // 1. Перевірка блокування
@@ -158,7 +163,7 @@ router.get("/admin", (req, res) => {
 router.post("/delete", (req, res) => {
     const { pass, index } = req.body;
 
-   	if (pass !== ADMIN_PASSWORD) {
+    if (pass !== ADMIN_PASSWORD) {
         return res.status(403).send("Доступ заборонено");
     }
 
