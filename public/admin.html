@@ -2,57 +2,103 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel — AutoSale Premium</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-
+    <title>Admin Panel — AutoSale</title>
     <style>
-        .admin-container { padding-top: 120px; text-align: center; }
-        .admin-box { width: 400px; margin: 20px auto; background: var(--card-bg); padding: 20px; border-radius: 10px; }
-        .admin-box input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: none; }
-        .admin-box button { padding: 10px 20px; background: var(--accent); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .car-list-admin { margin-top: 30px; }
-        .car-item { background: var(--card-bg); padding: 15px; margin: 10px auto; width: 400px; border-radius: 10px; }
-        .car-item button { background: red; color: white; margin-top: 10px; }
+        :root { --accent: #007bff; --bg: #f4f7f6; --card-bg: #fff; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; }
+        .admin-container { padding: 40px 20px; max-width: 500px; margin: auto; }
+        
+        /* Стиль полів */
+        .admin-box { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input { width: 100%; box-sizing: border-box; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; }
+        
+        /* Стиль кнопок */
+        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        button:hover { opacity: 0.9; }
+        button.delete-btn { background: #ff4d4d; }
+        
+        /* Картки авто */
+        .car-item { background: #fff; padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
-
 <body>
 
-<nav>
-    <a href="index.html">← Назад на сайт</a>
-</nav>
-
 <div class="admin-container">
-
     <!-- ЛОГІН -->
-    <div id="loginBox">
-        <input type="password" id="adminPass" placeholder="Пароль">
+    <div id="loginBox" class="admin-box">
+        <h3>Вхід в адмін-панель</h3>
+        <input type="password" id="adminPass" placeholder="Введіть пароль">
         <button onclick="login()">Увійти</button>
     </div>
 
     <!-- АДМІН ПАНЕЛЬ -->
     <div id="adminPanel" style="display:none;">
-
         <div class="admin-box">
             <h2>Додати авто</h2>
-
-            <input id="carName" placeholder="Назва авто">
-            <input id="carBrand" placeholder="Марка (BMW, Audi...)">
-            <input id="carYear" placeholder="Рік">
-            <input id="carPrice" placeholder="Ціна (€)">
-            <input id="carImg" placeholder="assets/img/car4.jpg">
-
-            <button onclick="addCar()">Додати</button>
+            <input id="carBrand" placeholder="Марка (наприклад: BMW)">
+            <input id="carName" placeholder="Модель (наприклад: X5)">
+            <input id="carYear" type="number" placeholder="Рік випуску">
+            <input id="carPrice" type="number" placeholder="Ціна (€)">
+            <input id="carImg" placeholder="Посилання на фото (URL)">
+            <button onclick="addCar()">Додати в каталог</button>
         </div>
 
         <h2>Список авто</h2>
-        <div id="adminCarList" class="car-list-admin"></div>
-
+        <div id="adminCarList"></div>
     </div>
-
 </div>
 
-<script src="admin.js"></script>
+<script>
+    const ADMIN_PASS = "12345"; // Змініть на свій
+
+    function login() {
+        if (document.getElementById("adminPass").value === ADMIN_PASS) {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("adminPanel").style.display = "block";
+            renderCars();
+        } else { alert("Невірний пароль!"); }
+    }
+
+    function addCar() {
+        const car = {
+            brand: document.getElementById("carBrand").value,
+            name: document.getElementById("carName").value,
+            year: document.getElementById("carYear").value,
+            price: document.getElementById("carPrice").value,
+            img: document.getElementById("carImg").value
+        };
+
+        if(!car.name || !car.price) return alert("Заповніть модель та ціну!");
+
+        let cars = JSON.parse(localStorage.getItem("cars") || "[]");
+        cars.push(car);
+        localStorage.setItem("cars", JSON.stringify(cars));
+        renderCars();
+        
+        // Очистка полів
+        document.querySelectorAll('input').forEach(i => i.value = '');
+    }
+
+    function deleteCar(index) {
+        if(!confirm("Видалити це авто?")) return;
+        let cars = JSON.parse(localStorage.getItem("cars") || "[]");
+        cars.splice(index, 1);
+        localStorage.setItem("cars", JSON.stringify(cars));
+        renderCars();
+    }
+
+    function renderCars() {
+        const list = document.getElementById("adminCarList");
+        const cars = JSON.parse(localStorage.getItem("cars") || "[]");
+        list.innerHTML = cars.map((c, i) => `
+            <div class="car-item">
+                <strong>${c.brand} ${c.name}</strong> (${c.year})<br>
+                Ціна: ${c.price} €
+                <button class="delete-btn" onclick="deleteCar(${i})">Видалити</button>
+            </div>
+        `).join('');
+    }
+</script>
+
 </body>
 </html>
