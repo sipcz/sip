@@ -72,7 +72,24 @@ app.get("/admin", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-// Головна сторінка для всіх інших посилань
+// ==========================================
+// 🪤 HONEYPOT (ПАСТКА ДЛЯ ХАКЕРІВ І БОТІВ)
+// ==========================================
+const trapRoutes = ["/wp-admin", "/login", "/administrator", "/admin.php"];
+
+trapRoutes.forEach(route => {
+    app.get(route, (req, res) => {
+        // Отримуємо IP хакера
+        const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress;
+        console.log(`⚠️ ХАКЕР В ПАСТЦІ! IP: ${ip} спробував зайти на ${route}`);
+        
+        // Віддаємо йому сторінку з приколом
+        res.sendFile(path.join(__dirname, "public", "trap.html"));
+    });
+});
+// ==========================================
+
+// Головна сторінка для всіх інших посилань (має бути в самому кінці!)
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
