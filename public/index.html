@@ -10,23 +10,24 @@
             --bg: #000;
             --text: #fff;
             --accent: #d4af37;
-            --card-bg: rgba(0,0,0,0.65);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border: rgba(212, 175, 55, 0.3);
         }
 
         .light-theme {
             --bg: #f5f5f5;
             --text: #111;
             --accent: #b8860b;
-            --card-bg: rgba(255,255,255,0.7);
+            --card-bg: rgba(0, 0, 0, 0.05);
+            --border: rgba(184, 134, 11, 0.3);
         }
 
         * { box-sizing: border-box; }
-
         body {
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             transition: 0.3s;
         }
 
@@ -35,175 +36,130 @@
         /* Відео-фон */
         .video-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
         }
-
         .video-bg video {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
-            filter: brightness(0.45);
+            filter: brightness(0.4);
         }
 
         /* Меню */
         nav {
             position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(6px);
+            top: 0; width: 100%; padding: 15px 5%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 40px;
-            z-index: 100;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
         }
 
-        nav .logo {
-            font-size: 26px;
-            font-weight: bold;
-            color: var(--accent);
-            text-shadow: 0 0 10px black;
-        }
+        .logo { font-size: 24px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
 
-        nav .menu { display: flex; }
-
-        nav .menu a {
+        .menu { display: flex; gap: 20px; }
+        .menu a {
             color: var(--text);
-            margin: 0 15px;
             text-decoration: none;
-            font-size: 18px;
-            position: relative;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
             transition: 0.3s;
         }
-
-        nav .menu a:hover { color: var(--accent); }
+        .menu a:hover { color: var(--accent); }
 
         .theme-toggle {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
+            background: var(--accent); border: none; color: #000;
+            padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;
         }
 
-        .burger {
-            display: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: var(--accent);
-        }
-
-        @media (max-width: 768px) {
-            nav { justify-content: space-between; padding: 15px 20px; }
-            .menu {
-                position: absolute; top: 70px; right: 0;
-                background: rgba(0,0,0,0.85); width: 200px;
-                padding: 20px; display: none; flex-direction: column; text-align: right;
-            }
-            .menu.active { display: flex; }
-            .burger { display: block; }
-        }
-
-        /* Контент */
+        /* Контентні секції */
         .content {
-            padding-top: 120px;
-            padding-bottom: 60px;
+            padding: 120px 5% 60px;
             text-align: center;
-            background: rgba(0,0,0,0.45);
             min-height: 100vh;
-        }
-
-        h1 {
-            font-size: 48px;
-            color: var(--accent);
-            text-shadow: 0 0 10px black;
-        }
-
-        /* --- ВИПРАВЛЕННЯ ФОРМИ ТАКСІ --- */
-        #taxiForm {
-            max-width: 450px;
-            margin: auto;
-            text-align: left;
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        .form-row {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 15px;
         }
 
-        .form-row label {
-            width: 130px; /* Фіксована ширина прибирає зміщення */
-            min-width: 130px;
-            font-weight: bold;
-            color: var(--accent);
+        h1 { font-size: 3rem; color: var(--accent); text-transform: uppercase; margin-bottom: 30px; }
+
+        /* --- КРАСИВІ КАРТКИ ПОСЛУГ ТА КОНТАКТІВ --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
         }
 
-        .form-row input, .form-row textarea {
-            flex: 1;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #555;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            outline: none;
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            text-decoration: none;
+            color: var(--text);
         }
 
-        .form-row input:focus { border-color: var(--accent); }
-
-        .antibot-box {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px dashed var(--accent);
-            border-radius: 8px;
-            text-align: center;
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
         }
 
-        #bot-letters {
-            background: var(--accent);
-            color: black;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            letter-spacing: 2px;
+        .feature-card i { font-size: 40px; color: var(--accent); margin-bottom: 15px; display: block; }
+        .feature-card h3 { margin: 10px 0; color: var(--accent); }
+
+        /* --- ФОРМА ТАКСІ (Виправлена) --- */
+        #taxiForm {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(15px);
+            text-align: left;
         }
 
-        #antibot {
-            width: 70px;
-            padding: 8px;
-            margin-top: 10px;
-            text-align: center;
-            font-size: 18px;
-            border-radius: 5px;
-            border: none;
+        .form-row { display: flex; align-items: center; margin-bottom: 15px; }
+        .form-row label { width: 130px; min-width: 130px; font-weight: bold; color: var(--accent); }
+        
+        .input-group {
+            flex: 1; display: flex; align-items: center;
+            background: rgba(255,255,255,0.1); border: 1px solid #555;
+            border-radius: 8px; overflow: hidden;
         }
+
+        .input-group input, .input-group textarea {
+            width: 100%; padding: 12px; background: transparent; border: none; color: white; outline: none;
+        }
+
+        .geo-btn { background: var(--accent); border: none; cursor: pointer; padding: 10px; font-size: 18px; }
 
         .submit-btn {
-            width: 100%; padding: 12px; background: var(--accent);
-            border: none; color: black; font-weight: bold; cursor: pointer;
-            border-radius: 5px; margin-top: 15px; font-size: 16px;
+            width: 100%; padding: 15px; background: var(--accent);
+            border: none; color: black; font-weight: 900; cursor: pointer;
+            border-radius: 8px; margin-top: 20px; text-transform: uppercase;
         }
 
-        /* Каталог */
-        #carsContainer div { transition: 0.3s; }
-        #carsContainer div:hover { transform: scale(1.03); }
+        .antibot-box { border: 1px dashed var(--accent); padding: 15px; border-radius: 10px; text-align: center; margin: 15px 0; }
+        #bot-letters { background: var(--accent); color: #000; padding: 2px 10px; border-radius: 4px; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .form-row { flex-direction: column; align-items: flex-start; }
+            .form-row label { margin-bottom: 5px; }
+            .menu { display: none; }
+        }
     </style>
 </head>
-
 <body>
 
 <div class="video-bg">
@@ -214,159 +170,166 @@
 
 <nav>
     <div class="logo">AutoSale</div>
-    <div class="menu" id="mainMenu">
+    <div class="menu">
         <a href="#home">Головна</a>
         <a href="#catalog">Каталог</a>
         <a href="#about">Про нас</a>
         <a href="#services">Послуги</a>
-        <a href="#contact">Контакти</a>
         <a href="#taxi">Таксі</a>
+        <a href="#contact">Контакти</a>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()">Тема</button>
-    <div class="burger" onclick="toggleMenu()">☰</div>
+    <button class="theme-toggle" onclick="toggleTheme()">ТЕМA</button>
 </nav>
 
-<div class="content" id="home">
+<section class="content" id="home">
     <h1>AutoSale Premium</h1>
-    <p>Елітні автомобілі. Преміальний сервіс.</p>
-</div>
+    <p style="font-size: 1.2rem; max-width: 600px;">Ваш провідник у світ розкоші та надійності. Найкращі авто під замовлення.</p>
+</section>
 
-<div class="content" id="catalog">
+<section class="content" id="catalog">
     <h1>Каталог авто</h1>
-    <div id="carsContainer" style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;"></div>
-</div>
+    <div id="carsContainer" style="display:flex; flex-wrap:wrap; justify-content:center; gap:25px;"></div>
+</section>
 
-<div class="content" id="about">
-    <h1>Про нас</h1>
-    <p>AutoSale Premium — сервіс преміального рівня з продажу авто з Європи.</p>
-</div>
-
-<div class="content" id="services">
+<section class="content" id="services">
     <h1>Наші послуги</h1>
-    <p>✔ Підбір авто<br>✔ Перевірка VIN<br>✔ Доставка<br>✔ Розмитнення</p>
-</div>
+    <div class="grid-container">
+        <div class="feature-card">
+            <i>💎</i>
+            <h3>Підбір авто</h3>
+            <p>Професійний аналіз ринку та пошук ідеального варіанту.</p>
+        </div>
+        <div class="feature-card">
+            <i>🔍</i>
+            <h3>Перевірка VIN</h3>
+            <p>Повна історія автомобіля, ДТП та сервісне обслуговування.</p>
+        </div>
+        <div class="feature-card">
+            <i>🚛</i>
+            <h3>Доставка</h3>
+            <p>Безпечне транспортування у будь-яку точку країни.</p>
+        </div>
+        <div class="feature-card">
+            <i>🛡️</i>
+            <h3>Розмитнення</h3>
+            <p>Повний юридичний супровід та швидке оформлення.</p>
+        </div>
+    </div>
+</section>
 
-<div class="content" id="contact">
-    <h1>Контакти</h1>
-    <p>Телефон: +380 ХХХ ХХХ ХХ ХХ<br>Email: autosale@gmail.com</p>
-</div>
-
-<div class="content" id="taxi">
+<section class="content" id="taxi">
     <h1>Виклик таксі</h1>
     <form id="taxiForm">
-        <input type="text" id="secret" name="secret" style="display:none">
-
         <div class="form-row">
             <label>Ваше ім'я:</label>
-            <input type="text" name="name" required>
+            <div class="input-group"><input type="text" name="name" placeholder="Олександр" required></div>
         </div>
-
         <div class="form-row">
             <label>Телефон:</label>
-            <input type="tel" name="phone" required>
+            <div class="input-group"><input type="tel" name="phone" placeholder="+380..." required></div>
         </div>
-
         <div class="form-row">
             <label>Адреса:</label>
-            <input type="text" name="address" required>
+            <div class="input-group">
+                <input type="text" name="address" id="addressInput" placeholder="Куди подати авто?" required>
+                <button type="button" class="geo-btn" onclick="getLocation()">📍</button>
+            </div>
         </div>
-
         <div class="form-row">
             <label>Коментар:</label>
-            <textarea name="comment" rows="2"></textarea>
+            <div class="input-group"><textarea name="comment" rows="2"></textarea></div>
         </div>
-
         <div class="antibot-box" id="captchaBox">
-            <label>🔐 Антибот: введіть <b id="bot-letters">--</b></label><br>
-            <input type="text" id="antibot" name="antibot" maxlength="2" required>
+            <label>🔐 Код: <span id="bot-letters">--</span></label><br>
+            <input type="text" id="antibot" name="antibot" style="width:70px; margin-top:10px; text-align:center;" required>
         </div>
-
-        <button type="submit" class="submit-btn">Викликати таксі 🚕</button>
+        <button type="submit" class="submit-btn">Замовити таксі 🚕</button>
+        <p id="taxiStatus" style="margin-top:15px; font-weight:bold; color:var(--accent); text-align:center;"></p>
     </form>
-    <p id="taxiStatus" style="margin-top:20px; font-size:20px; color:var(--accent); font-weight:bold;"></p>
-</div>
+</section>
+
+<section class="content" id="contact">
+    <h1>Наші контакти</h1>
+    <div class="grid-container">
+        <a href="tel:+380000000000" class="feature-card">
+            <i>📞</i>
+            <h3>Телефон</h3>
+            <p>+380 (99) 000 00 00</p>
+        </a>
+        <a href="mailto:info@autosale.com" class="feature-card">
+            <i>📧</i>
+            <h3>Email</h3>
+            <p>vip@autosale.premium</p>
+        </a>
+        <div class="feature-card">
+            <i>📍</i>
+            <h3>Адреса</h3>
+            <p>Київ, вул. Велика Васильківська, 10</p>
+        </div>
+    </div>
+</section>
 
 <script>
-// ТЕМА ТА МЕНЮ
 function toggleTheme() { document.body.classList.toggle("light-theme"); }
-function toggleMenu() { document.getElementById("mainMenu").classList.toggle("active"); }
 
-// ОРИГІНАЛЬНЕ ЗАВАНТАЖЕННЯ АВТО
-async function loadCarsForSite() {
+// ГЕОЛОКАЦІЯ 📍
+function getLocation() {
+    const btn = document.querySelector('.geo-btn');
+    if (navigator.geolocation) {
+        btn.innerText = "⏳";
+        navigator.geolocation.getCurrentPosition(async (p) => {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`);
+                const data = await res.json();
+                document.getElementById('addressInput').value = data.address.road || data.display_name.split(',')[0];
+            } catch (e) { document.getElementById('addressInput').value = "Адресу визначено"; }
+            btn.innerText = "📍";
+        }, () => { btn.innerText = "📍"; alert("Доступ до геоданих відхилено"); });
+    }
+}
+
+// ЗАВАНТАЖЕННЯ АВТО
+async function loadCars() {
     try {
         const res = await fetch("/api/cars/public");
         const cars = await res.json();
         const container = document.getElementById("carsContainer");
-        container.innerHTML = "";
-
-        cars.forEach(car => {
-            const div = document.createElement("div");
-            div.style.width = "300px";
-            div.style.background = "var(--card-bg)";
-            div.style.padding = "15px";
-            div.style.borderRadius = "10px";
-            div.style.backdropFilter = "blur(6px)";
-            div.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-
-            div.innerHTML = `
+        container.innerHTML = cars.map(car => `
+            <div style="width:300px; background:var(--card-bg); padding:15px; border-radius:15px; backdrop-filter:blur(6px); border:1px solid var(--border);">
                 <img src="${car.img}" style="width:100%; border-radius:10px; height:180px; object-fit:cover;">
-                <h3 style="color:var(--accent); margin:10px 0 5px;">${car.name}</h3>
+                <h3 style="color:var(--accent); margin:10px 0;">${car.name}</h3>
                 <p>${car.brand} — ${car.year}</p>
                 <p style="font-size:20px; color:var(--accent); font-weight:bold;">${car.price}€</p>
-            `;
-            container.appendChild(div);
-        });
-    } catch(e) { console.log("Помилка завантаження авто"); }
+            </div>
+        `).join('');
+    } catch(e) {}
 }
-loadCarsForSite();
+loadCars();
 
-// АНТИБОТ ТА ВІДПРАВКА
+// АНТИБОТ ТА ФОРМА
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("taxiForm");
-    const botLettersEl = document.getElementById("bot-letters");
-
-    function generateCaptcha() {
-        const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-        const code = letters[Math.floor(Math.random() * letters.length)] + 
-                     letters[Math.floor(Math.random() * letters.length)];
-        botLettersEl.innerText = code;
-        
-        let hidden = form.querySelector('input[name="expected"]');
-        if (!hidden) {
-            hidden = document.createElement("input");
-            hidden.type = "hidden";
-            hidden.name = "expected";
-            form.appendChild(hidden);
-        }
-        hidden.value = code;
+    function gen() {
+        const code = Math.random().toString(36).substring(2, 4).toUpperCase();
+        document.getElementById("bot-letters").innerText = code;
+        let h = form.querySelector('[name="expected"]') || document.createElement("input");
+        h.type="hidden"; h.name="expected"; h.value=code; form.appendChild(h);
     }
-    generateCaptcha();
+    gen();
 
-    // Перевірка Whitelist
-    fetch("/api/taxi/check-ip")
-        .then(r => r.json())
-        .then(data => {
-            if (data.whitelisted) document.getElementById("captchaBox").style.display = "none";
-        });
-
-    // Відправка
     form.onsubmit = async (e) => {
         e.preventDefault();
         const status = document.getElementById("taxiStatus");
-        status.innerText = "Відправка замовлення...";
-
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
+        status.innerText = "Відправка...";
+        const data = Object.fromEntries(new FormData(form).entries());
         try {
             const res = await fetch("/api/taxi", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             });
-            const msg = await res.text();
-            status.innerText = msg;
-            if (res.ok) { form.reset(); generateCaptcha(); }
+            status.innerText = await res.text();
+            if (res.ok) { form.reset(); gen(); }
         } catch (err) { status.innerText = "Помилка сервера"; }
     };
 });
