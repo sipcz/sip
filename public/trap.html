@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Database Administration</title>
+    <style>
+        body { background: #f4f4f4; font-family: monospace; text-align: center; padding-top: 100px; transition: 0.5s; }
+        .login-box { background: white; padding: 40px; border: 1px solid #ccc; display: inline-block; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; margin: 10px; border: 1px solid #aaa; }
+        button { padding: 10px 20px; cursor: pointer; }
+        
+        /* Прихований хакерський екран */
+        #hackerScreen { display: none; color: #0f0; background: #000; position: fixed; top:0; left:0; width:100%; height:100%; text-align:left; padding: 20px; box-sizing: border-box; font-size: 18px; }
+        .red { color: red; font-weight: bold; font-size: 24px;}
+    </style>
+</head>
+<body>
+
+    <div id="loginForm" class="login-box">
+        <h2>System Admin Login</h2>
+        <p style="color: red; font-size: 12px;">Warning: Unsecured connection</p>
+        <input type="text" placeholder="Username" value="admin"><br>
+        <input type="password" placeholder="Password"><br>
+        <button onclick="triggerTrap()">Login</button>
+    </div>
+
+    <div id="hackerScreen">
+        <div id="consoleText"></div>
+        <img id="meme" src="https://media.giphy.com/media/Ju7l5y9osyymQ/giphy.gif" style="display:none; margin-top: 20px; max-width: 100%;">
+    </div>
+
+    <script>
+        async function triggerTrap() {
+            // Ховаємо форму, показуємо чорний екран
+            document.body.style.background = "#000";
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("hackerScreen").style.display = "block";
+
+            const cons = document.getElementById("consoleText");
+            const meme = document.getElementById("meme");
+
+            // Отримуємо IP хакера для більшого страху
+            let ip = "Unknown";
+            try {
+                const res = await fetch("https://api.ipify.org?format=json");
+                const data = await res.json();
+                ip = data.ip;
+            } catch(e) {}
+
+            // Текст, який буде друкуватися
+            const lines = [
+                "ACCESS GRANTED...",
+                "Wait a minute...",
+                "<span class='red'>UNAUTHORIZED BREACH DETECTED!</span>",
+                "Initiating Counter-Hack protocol...",
+                `Target IP Locked: ${ip}`,
+                "Downloading target local files...",
+                "Uploading browsing history to FBI database...",
+                "Formatting hard drive C:\\ in 3... 2... 1...",
+                "JUST KIDDING. YOU GOT RICKROLLED, STUPID BOT! 🤣"
+            ];
+
+            // Ефект друкування тексту
+            for (let i = 0; i < lines.length; i++) {
+                await new Promise(r => setTimeout(r, 1500)); // Затримка між рядками
+                cons.innerHTML += lines[i] + "<br><br>";
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+
+            // Показуємо гіфку Ріка Естлі
+            setTimeout(() => { meme.style.display = "block"; }, 1000);
+        }
+    </script>
+</body>
+</html>
