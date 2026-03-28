@@ -45,7 +45,7 @@ router.post("/", async (req, res) => {
     }
 
     // 🛡️ 2. Антиспам по IP (30 сек)
-    if (ipLimit.has(ip) && now - ipLimit.get(ip) < 30000) {
+    if (ipLimit.has(ip) && now - ipLimit.get(ip) < 300000) {
         return res.status(429).send("Занадто часто! Спробуйте через 30 секунд.");
     }
     ipLimit.set(ip, now);
