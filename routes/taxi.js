@@ -8,6 +8,16 @@ const BOT_TOKEN = "8381037035:AAGhfS8LbZQCgPf_oAVyvG9tXDLtfAxGVug";
 const CHAT_ID = "8257665442";
 const ADMIN_PASSWORD = "pedro2026";
 
+// ===== МІДЛВЕРА ДЛЯ ПРАВИЛЬНОГО IP =====
+router.use((req, res, next) => {
+    req.realIp =
+        req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+        req.connection.remoteAddress ||
+        req.ip;
+
+    next();
+});
+
 // ===== АНТИСПАМ =====
 
 // Whitelist — твої IP ніколи не блокуються
@@ -40,7 +50,7 @@ if (!fs.existsSync(LOG_FILE)) {
 
 router.post("/", async (req, res) => {
     const { name, phone, address, comment, secret } = req.body;
-    const ip = req.ip;
+    const ip = req.realIp;
     const now = Date.now();
 
     // 0. Whitelist
@@ -148,7 +158,7 @@ router.get("/admin", (req, res) => {
 router.post("/delete", (req, res) => {
     const { pass, index } = req.body;
 
-    if (pass !== ADMIN_PASSWORD) {
+   	if (pass !== ADMIN_PASSWORD) {
         return res.status(403).send("Доступ заборонено");
     }
 
