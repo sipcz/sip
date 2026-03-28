@@ -1,25 +1,25 @@
 import express from "express";
 import axios from "axios";
-import mongoose from "mongoose"; // Підключаємо базу даних
+import { promises as fs } from "fs"; 
 
 const router = express.Router();
 
 const BOT_TOKEN = "8381037035:AAGhfS8LbZQCgPf_oAVyvG9tXDLtfAxGVug";
 const CHAT_ID = "8257665442";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "pedro2026";
+const LOG_FILE = "./taxi-log.json";
 
-// 1. Схема бази даних для таксі
-const taxiSchema = new mongoose.Schema({
-    name: String,
-    phone: String,
-    address: String,
-    comment: String,
-    time: String,
-    ip: String
-});
-const Taxi = mongoose.model("Taxi", taxiSchema);
+// Ініціалізація файлу логів
+async function initLogs() {
+    try {
+        await fs.access(LOG_FILE);
+    } catch {
+        await fs.writeFile(LOG_FILE, "[]");
+    }
+}
+initLogs();
 
-// Мідлвера IP (залишаємо твою)
+// Отримуємо реальний IP клієнта
 router.use((req, res, next) => {
     req.realIp = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.socket.remoteAddress || req.ip;
     next();
@@ -29,7 +29,7 @@ const WHITELIST = new Set(["::1", "127.0.0.1"]);
 const BLOCKED = new Map();
 const RATE_LIMIT_IP = new Map();
 
-// Основний роут (Виклик таксі)
+// 1. КЛІЄНТ ЗАМОВЛЯЄ ТАКСІ
 router.post("/", async (req, res) => {
     const { name, phone, address, comment, antibot, expected, secret } = req.body;
     const ip = req.realIp;
@@ -51,14 +51,22 @@ router.post("/", async (req, res) => {
     }
 
     try {
-        // ЗБЕРЕЖЕННЯ В MONGODB (замість файлу json)
-        const time = new Date().toLocaleString();
-        const newRequest = new Taxi({ name, phone, address, comment, time, ip });
-        await newRequest.save();
-
-        // TELEGRAM (залишаємо твій)
-        const text = `🚕 *Новий виклик!*\n\n👤 Ім'я: ${name}\n📞 Тел: ${phone}\n📍 Адреса: ${address}\n💬 Коментар: ${comment || "-"}\n\n🌐 IP: ${ip}`;
+        // ЗБЕРЕЖЕННЯ У ФАЙЛ taxi-log.json
+        const fileData = await fs.readFile(LOG_FILE, "utf-8");
+        const logs = JSON.parse(fileData);
         
+        // Створюємо заявку з унікальним _id (щоб адмінка могла видаляти)
+        const newRequest = { 
+            _id: Date.now().toString(), // Унікальний номер
+            time: new Date().toLocaleString(), 
+            name, phone, address, comment, ip 
+        };
+        
+        logs.push(newRequest);
+        await fs.writeFile(LOG_FILE, JSON.stringify(logs, null, 2));
+
+        // ВІДПРАВКА В TELEGRAM
+        const text = `🚕 *Новий виклик!*\n\n👤 Ім'я: ${name}\n📞 Тел: ${phone}\n📍 Адреса: ${address}\n💬 Коментар: ${comment || "-"}\n\n🌐 IP: ${ip}`;
         await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             chat_id: CHAT_ID,
             text,
@@ -74,26 +82,34 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Адмін-панель: Отримати всі заявки
+// 2. АДМІН ОТРИМУЄ СПИСОК
 router.get("/admin", async (req, res) => {
-    if (req.query.pass !== ADMIN_PASSWORD) return res.status(403).send("Доступ заборонено");
+    if (req.query.pass !== ADMIN_PASSWORD) return res.status(403).json({ error: "Невірний пароль" });
     
     try {
-        const requests = await Taxi.find().sort({ _id: -1 }); // Нові зверху
-        res.json(requests);
+        const fileData = await fs.readFile(LOG_FILE, "utf-8");
+        let logs = JSON.parse(fileData);
+        logs = logs.reverse(); // Нові заявки будуть зверху
+        res.json(logs);
     } catch (error) {
-        res.status(500).send("Помилка завантаження бази");
+        res.status(500).json({ error: "Помилка читання файлу" });
     }
 });
 
-// Адмін-панель: Видалити заявку (перероблено під MongoDB ID)
+// 3. АДМІН ВИДАЛЯЄ ЗАЯВКУ
 router.post("/delete", async (req, res) => {
     const { pass, id } = req.body;
     
     if (pass !== ADMIN_PASSWORD) return res.status(403).send("Доступ заборонено");
 
     try {
-        await Taxi.findByIdAndDelete(id);
+        const fileData = await fs.readFile(LOG_FILE, "utf-8");
+        let logs = JSON.parse(fileData);
+        
+        // Залишаємо тільки ті заявки, _id яких НЕ збігається з тим, що ми видаляємо
+        logs = logs.filter(req => req._id !== id);
+        
+        await fs.writeFile(LOG_FILE, JSON.stringify(logs, null, 2));
         res.send("Замовлення видалено!");
     } catch (error) {
         res.status(500).send("Помилка видалення");
