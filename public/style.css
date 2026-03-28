@@ -121,22 +121,16 @@ footer {
     margin-top: 40px;
 }
 
+/* 🔧 ВИПРАВЛЕНИЙ АНТИБОТ */
 .antibot-box {
     margin-top: 15px;
-    padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 215, 0, 0.5);
-    border-radius: 8px;
-    backdrop-filter: blur(4px);
-    animation: antibotFadeIn 0.4s ease;
 }
 
 .antibot-box label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: block;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: #ffd700;
+    color: var(--text);
 }
 
 .antibot-box .icon {
@@ -145,26 +139,23 @@ footer {
 
 .antibot-box b {
     letter-spacing: 2px;
+    color: var(--accent);
 }
 
 #antibot {
-    margin-top: 6px;
-    width: 90px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid #aaa;
+    margin-top: 4px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
     font-size: 16px;
     text-align: center;
     background: rgba(255,255,255,0.9);
+    box-sizing: border-box;
 }
 
 #antibot:focus {
     outline: none;
-    border-color: #ffd700;
+    border: 1px solid #ffd700;
     box-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
-}
-
-@keyframes antibotFadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
 }
