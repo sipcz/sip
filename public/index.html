@@ -331,6 +331,38 @@ document.getElementById("taxiForm")?.addEventListener("submit", async (e) => {
     document.getElementById("taxiStatus").innerText = msg;
 });
 </script>
+    
+<script>
+    // Генерація рандомних 2 букв
+    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const code =
+        letters[Math.floor(Math.random() * letters.length)] +
+        letters[Math.floor(Math.random() * letters.length)];
+
+    const botLettersEl = document.getElementById("bot-letters");
+    const form = document.querySelector("form[action='/api/taxi']");
+
+    if (botLettersEl && form) {
+        botLettersEl.innerText = code;
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "expected";
+        hidden.value = code;
+        form.appendChild(hidden);
+    }
+
+    // Ховаємо антибот для whitelist
+    fetch("/api/taxi/check-ip")
+        .then(r => r.json())
+        .then(data => {
+            if (data.whitelisted) {
+                const box = document.querySelector(".antibot-box");
+                if (box) box.style.display = "none";
+            }
+        })
+        .catch(() => {});
+</script>
 
 </body>
 </html>
