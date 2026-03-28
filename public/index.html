@@ -20,8 +20,6 @@
             --card-bg: rgba(255,255,255,0.7);
         }
 
-        html { scroll-behavior: smooth; }
-
         body {
             margin: 0;
             background: var(--bg);
@@ -29,6 +27,8 @@
             font-family: Arial, sans-serif;
             transition: 0.3s;
         }
+
+        html { scroll-behavior: smooth; }
 
         /* Відео-фон */
         .video-bg {
@@ -133,12 +133,6 @@
             text-align: center;
             background: rgba(0,0,0,0.45);
             min-height: 100vh;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
@@ -147,33 +141,28 @@
             text-shadow: 0 0 10px black;
         }
 
-        p { font-size: 20px; }
-
         /* АНТИБОТ */
         .antibot-box {
             margin-top: 15px;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.45);
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.55);
             border: 1px solid rgba(255, 215, 0, 0.5);
             border-radius: 8px;
             backdrop-filter: blur(4px);
-            animation: antibotFadeIn 0.4s ease;
         }
 
         .antibot-box label {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-weight: 600;
+            font-weight: bold;
             color: #ffd700;
         }
 
-        .antibot-box .icon { font-size: 20px; }
-
         #antibot {
-            margin-top: 6px;
+            margin-top: 8px;
             width: 90px;
-            padding: 6px 8px;
+            padding: 8px;
             border-radius: 6px;
             border: 1px solid #aaa;
             font-size: 16px;
@@ -186,17 +175,12 @@
             border-color: #ffd700;
             box-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
         }
-
-        @keyframes antibotFadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 
 <body>
 
-<!-- Відео на фоні -->
+<!-- Відео -->
 <div class="video-bg">
     <video autoplay muted loop playsinline>
         <source src="video/video.mp4" type="video/mp4">
@@ -229,16 +213,13 @@
 <!-- Каталог -->
 <div class="content" id="catalog">
     <h1>Каталог авто</h1>
-
-    <div id="carsContainer"
-         style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;">
-    </div>
+    <div id="carsContainer" style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;"></div>
 </div>
 
 <!-- Про нас -->
 <div class="content" id="about">
     <h1>Про нас</h1>
-    <p>AutoSale Premium — це сервіс преміального рівня з продажу автомобілів з Європи.</p>
+    <p>AutoSale Premium — сервіс преміального рівня з продажу авто з Європи.</p>
 </div>
 
 <!-- Послуги -->
@@ -276,7 +257,7 @@
         <!-- АНТИБОТ -->
         <div class="antibot-box">
             <label for="antibot">
-                <span class="icon">🔐</span>
+                <span style="font-size:20px;">🔐</span>
                 Антибот: введіть <b id="bot-letters"></b>
             </label>
             <input type="text" id="antibot" name="antibot" maxlength="2" required>
@@ -285,7 +266,7 @@
         <button type="submit" style="
             width:100%; padding:12px; background:var(--accent);
             border:none; color:black; font-weight:bold; cursor:pointer;
-            border-radius:5px;">
+            border-radius:5px; margin-top:15px;">
             Викликати таксі
         </button>
     </form>
@@ -335,7 +316,7 @@ async function loadCarsForSite() {
 loadCarsForSite();
 </script>
 
-<!-- АНТИБОТ + ВІДПРАВКА ФОРМИ -->
+<!-- АНТИБОТ + ВІДПРАВКА -->
 <script>
 // Генерація рандомних 2 букв
 document.addEventListener("DOMContentLoaded", () => {
