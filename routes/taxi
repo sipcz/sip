@@ -1,0 +1,70 @@
+import express from "express";
+import mongoose from "mongoose";
+
+const router = express.Router();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "pedro2026";
+
+// 1. Створюємо Схему (структуру) для заявок таксі
+const taxiSchema = new mongoose.Schema({
+    name: String,
+    phone: String,
+    address: String,
+    comment: String,
+    time: String,
+    ip: String
+});
+
+// Створюємо Модель бази даних
+const Taxi = mongoose.model("Taxi", taxiSchema);
+
+// 2. КЛІЄНТ ЗАМОВЛЯЄ ТАКСІ (Публічний доступ)
+router.post("/", async (req, res) => {
+    try {
+        const { name, phone, address, comment, time } = req.body;
+        // Отримуємо IP клієнта
+        const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress;
+
+        // Створюємо і зберігаємо нову заявку в базу
+        const newRequest = new Taxi({ name, phone, address, comment, time, ip });
+        await newRequest.save();
+
+        res.json({ success: true, message: "Замовлення прийнято!" });
+    } catch (error) {
+        res.status(500).json({ error: "Помилка збереження замовлення" });
+    }
+});
+
+// 3. АДМІН ОТРИМУЄ СПИСОК (Захищено паролем)
+router.get("/admin", async (req, res) => {
+    const { pass } = req.query;
+
+    if (pass !== ADMIN_PASSWORD) {
+        return res.status(403).json({ error: "Невірний пароль" });
+    }
+
+    try {
+        // Отримуємо всі заявки (сортуємо, щоб нові були зверху)
+        const requests = await Taxi.find().sort({ _id: -1 });
+        res.json(requests);
+    } catch (error) {
+        res.status(500).json({ error: "Помилка завантаження бази" });
+    }
+});
+
+// 4. АДМІН ВИДАЛЯЄ ЗАЯВКУ (Захищено паролем)
+router.post("/delete", async (req, res) => {
+    const { pass, id } = req.body;
+
+    if (pass !== ADMIN_PASSWORD) {
+        return res.status(403).send("Невірний пароль");
+    }
+
+    try {
+        await Taxi.findByIdAndDelete(id); // Видаляємо по унікальному ID MongoDB
+        res.send("Замовлення видалено!");
+    } catch (error) {
+        res.status(500).send("Помилка видалення");
+    }
+});
+
+export default router;
