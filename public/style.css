@@ -1,20 +1,21 @@
 :root {
-    --bg: #000;
+    --bg: transparent; /* Робимо фон прозорим, щоб бачити відео */
     --text: #fff;
     --accent: #d4af37;
-    --card-bg: rgba(0,0,0,0.65);
+    --card-bg: rgba(0, 0, 0, 0.6); /* Темні картки для контрасту на відео */
+    --nav-bg: rgba(0, 0, 0, 0.7);
 }
 
 .light-theme {
-    --bg: #f5f5f5;
     --text: #111;
     --accent: #b8860b;
-    --card-bg: rgba(255,255,255,0.7);
+    --card-bg: rgba(255, 255, 255, 0.8); /* Світлі напівпрозорі картки */
+    --nav-bg: rgba(255, 255, 255, 0.8);
 }
 
 body {
     margin: 0;
-    background: var(--bg);
+    background: #000; /* Резервний колір */
     color: var(--text);
     font-family: Arial, sans-serif;
     transition: 0.3s;
@@ -34,6 +35,8 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Тут можна налаштувати яскравість самого відео, якщо воно занадто світле */
+    filter: brightness(0.6); 
 }
 
 nav {
@@ -41,19 +44,40 @@ nav {
     top: 0;
     width: 100%;
     padding: 15px 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
+    background: var(--nav-bg);
+    backdrop-filter: blur(8px);
     text-align: center;
     z-index: 10;
+    transition: 0.3s;
 }
 
-nav a {
-    color: var(--text);
-    margin: 0 20px;
-    text-decoration: none;
-    font-size: 18px;
+/* Прибираємо суцільні фони у контенту, щоб бачити відео */
+.content, .catalog-section, footer {
+    background: transparent !important; 
+    padding-top: 120px;
+    text-align: center;
 }
 
+/* Додаємо фон тільки самим карткам та фільтрам, щоб вони виділялися */
+.car-card, .filters, .taxi-card, .feature-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    transition: 0.3s;
+}
+
+.car-card:hover {
+    border-color: var(--accent);
+}
+
+/* Робимо заголовки чіткішими на фоні відео */
+h1, h2 {
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+}
+
+/* Кнопка перемикання */
 .theme-toggle {
     position: absolute;
     right: 20px;
@@ -63,99 +87,13 @@ nav a {
     padding: 8px 15px;
     border-radius: 5px;
     cursor: pointer;
-    color: black;
+    color: #000;
     font-weight: bold;
 }
 
-.content {
-    padding-top: 120px;
-    text-align: center;
-    background: rgba(0,0,0,0.45);
-    min-height: 100vh;
-}
-
-.catalog-section {
-    padding: 40px 0;
-    background: rgba(0,0,0,0.55);
-}
-
-.filters {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.filters input, .filters select {
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    width: 180px;
-}
-
-.catalog-grid {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 25px;
-}
-
-.car-card {
-    width: 280px;
-    background: var(--card-bg);
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    transition: 0.3s;
-}
-
-.car-card img {
-    width: 100%;
-    border-radius: 10px;
-}
-
-footer {
-    background: rgba(0,0,0,0.7);
-    padding: 30px;
-    text-align: center;
-    margin-top: 40px;
-}
-
-/* 🔧 ВИПРАВЛЕНИЙ АНТИБОТ */
-.antibot-box {
-    margin-top: 15px;
-}
-
-.antibot-box label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.antibot-box .icon {
-    font-size: 20px;
-}
-
-.antibot-box b {
-    letter-spacing: 2px;
-    color: var(--accent);
-}
-
-#antibot {
-    margin-top: 4px;
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-    text-align: center;
-    background: rgba(255,255,255,0.9);
-    box-sizing: border-box;
-}
-
-#antibot:focus {
-    outline: none;
-    border: 1px solid #ffd700;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
+/* Інпути у світлій темі */
+.light-theme input, .light-theme select {
+    background: #fff;
+    color: #000;
+    border: 1px solid #ccc;
 }
