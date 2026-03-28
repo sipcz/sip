@@ -20,9 +20,7 @@
             --card-bg: rgba(255,255,255,0.7);
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
@@ -81,9 +79,7 @@
             transition: 0.3s;
         }
 
-        nav .menu a:hover {
-            color: var(--accent);
-        }
+        nav .menu a:hover { color: var(--accent); }
 
         nav .menu a::after {
             content: "";
@@ -96,9 +92,7 @@
             transition: 0.3s;
         }
 
-        nav .menu a:hover::after {
-            width: 100%;
-        }
+        nav .menu a:hover::after { width: 100%; }
 
         .burger {
             display: none;
@@ -107,7 +101,6 @@
             color: var(--accent);
         }
 
-        /* Мобільне меню */
         @media (max-width: 768px) {
             nav {
                 justify-content: space-between;
@@ -131,9 +124,7 @@
                 font-size: 20px;
             }
 
-            .burger {
-                display: block;
-            }
+            .burger { display: block; }
         }
 
         /* Контент */
@@ -156,8 +147,49 @@
             text-shadow: 0 0 10px black;
         }
 
-        p {
-            font-size: 20px;
+        p { font-size: 20px; }
+
+        /* АНТИБОТ */
+        .antibot-box {
+            margin-top: 15px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            animation: antibotFadeIn 0.4s ease;
+        }
+
+        .antibot-box label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+
+        .antibot-box .icon { font-size: 20px; }
+
+        #antibot {
+            margin-top: 6px;
+            width: 90px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            font-size: 16px;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+        }
+
+        #antibot:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
+        }
+
+        @keyframes antibotFadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -206,64 +238,57 @@
 <!-- Про нас -->
 <div class="content" id="about">
     <h1>Про нас</h1>
-    <p>AutoSale Premium — це сервіс преміального рівня з продажу автомобілів з Європи.
-       Ми працюємо тільки з перевіреними постачальниками та гарантуємо якість кожного авто.</p>
+    <p>AutoSale Premium — це сервіс преміального рівня з продажу автомобілів з Європи.</p>
 </div>
 
 <!-- Послуги -->
 <div class="content" id="services">
     <h1>Наші послуги</h1>
-    <p>✔ Підбір авто під ваш бюджет<br>
-       ✔ Перевірка авто по VIN<br>
-       ✔ Доставка з Європи<br>
-       ✔ Розмитнення та оформлення документів<br>
-       ✔ Гарантія прозорості та безпеки</p>
+    <p>✔ Підбір авто<br>✔ Перевірка VIN<br>✔ Доставка<br>✔ Розмитнення</p>
 </div>
 
 <!-- Контакти -->
 <div class="content" id="contact">
     <h1>Контакти</h1>
-    <p>Телефон: +380 ХХХ ХХХ ХХ ХХ<br>
-       Email: autosale@gmail.com<br>
-       Локація: Україна / Європа</p>
+    <p>Телефон: +380 ХХХ ХХХ ХХ ХХ<br>Email: autosale@gmail.com</p>
 </div>
-    <div class="antibot-box">
-    <label for="antibot">
-        <span class="icon">🔐</span>
-        Антибот: введіть <b id="bot-letters"></b>
-    </label>
-    <input type="text" id="antibot" name="antibot" maxlength="2" required>
-</div>
+
 <!-- Таксі -->
 <div class="content" id="taxi">
     <h1>Виклик таксі</h1>
 
-    <form id="taxiForm" style="max-width:400px; margin:auto; text-align:left;">
+    <form id="taxiForm" action="/api/taxi" method="POST" style="max-width:400px; margin:auto; text-align:left;">
 
-    <!-- 🛡️ Антибот-поле (honeypot) -->
-    <input type="text" id="secret" name="secret" style="display:none">
+        <input type="text" id="secret" name="secret" style="display:none">
 
-    <label>Ваше ім'я:</label>
-    <input type="text" id="name" required style="width:100%; padding:10px; margin-bottom:10px;">
+        <label>Ваше ім'я:</label>
+        <input type="text" id="name" name="name" required>
 
-    <label>Телефон:</label>
-    <input type="text" id="phone" required style="width:100%; padding:10px; margin-bottom:10px;">
+        <label>Телефон:</label>
+        <input type="text" id="phone" name="phone" required>
 
-    <label>Адреса подачі:</label>
-    <input type="text" id="address" required style="width:100%; padding:10px; margin-bottom:10px;">
+        <label>Адреса подачі:</label>
+        <input type="text" id="address" name="address" required>
 
-    <label>Коментар:</label>
-    <textarea id="comment" style="width:100%; padding:10px; margin-bottom:10px;"></textarea>
+        <label>Коментар:</label>
+        <textarea id="comment" name="comment"></textarea>
 
-    <button type="submit" style="
-        width:100%; padding:12px; background:var(--accent); 
-        border:none; color:black; font-weight:bold; cursor:pointer;
-        border-radius:5px;">
-        Викликати таксі
-    </button>
-</form>
+        <!-- АНТИБОТ -->
+        <div class="antibot-box">
+            <label for="antibot">
+                <span class="icon">🔐</span>
+                Антибот: введіть <b id="bot-letters"></b>
+            </label>
+            <input type="text" id="antibot" name="antibot" maxlength="2" required>
+        </div>
 
-
+        <button type="submit" style="
+            width:100%; padding:12px; background:var(--accent);
+            border:none; color:black; font-weight:bold; cursor:pointer;
+            border-radius:5px;">
+            Викликати таксі
+        </button>
+    </form>
 
     <p id="taxiStatus" style="margin-top:20px; font-size:22px; color:var(--accent);"></p>
 </div>
@@ -278,6 +303,7 @@ function toggleMenu() {
     menu.style.display = menu.style.display === "flex" ? "none" : "flex";
 }
 
+// Завантаження авто
 async function loadCarsForSite() {
     const res = await fetch("/api/cars/public");
     const cars = await res.json();
@@ -306,41 +332,20 @@ async function loadCarsForSite() {
         container.appendChild(div);
     });
 }
-
 loadCarsForSite();
-
-
-// 🔥 Ось тут вставляється твій код таксі
-document.getElementById("taxiForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const data = {
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        address: document.getElementById("address").value,
-        comment: document.getElementById("comment").value
-    };
-
-    const res = await fetch("/api/taxi", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
-
-    const msg = await res.text();
-    document.getElementById("taxiStatus").innerText = msg;
-});
 </script>
-    
+
+<!-- АНТИБОТ + ВІДПРАВКА ФОРМИ -->
 <script>
-    // Генерація рандомних 2 букв
+// Генерація рандомних 2 букв
+document.addEventListener("DOMContentLoaded", () => {
     const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
     const code =
         letters[Math.floor(Math.random() * letters.length)] +
         letters[Math.floor(Math.random() * letters.length)];
 
     const botLettersEl = document.getElementById("bot-letters");
-    const form = document.querySelector("form[action='/api/taxi']");
+    const form = document.getElementById("taxiForm");
 
     if (botLettersEl && form) {
         botLettersEl.innerText = code;
@@ -360,8 +365,26 @@ document.getElementById("taxiForm")?.addEventListener("submit", async (e) => {
                 const box = document.querySelector(".antibot-box");
                 if (box) box.style.display = "none";
             }
-        })
-        .catch(() => {});
+        });
+});
+
+// Відправка форми
+document.getElementById("taxiForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = document.getElementById("taxiForm");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const res = await fetch("/api/taxi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    const msg = await res.text();
+    document.getElementById("taxiStatus").innerText = msg;
+});
 </script>
 
 </body>
