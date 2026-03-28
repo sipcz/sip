@@ -2,110 +2,242 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Адмін — Таксі</title>
+    <title>Адмін — Таксі Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        :root {
+            --bg: #000;
+            --text: #fff;
+            --accent: #d4af37;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --input-bg: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background: #111;
-            color: #fff;
-            font-family: Arial;
-            padding: 20px;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
         }
-        table {
+
+        .video-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden;
+        }
+        .video-bg video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: brightness(0.35);
+        }
+
+        nav {
+            position: fixed;
+            top: 0; width: 100%; padding: 15px 5%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        nav a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .admin-container { 
+            padding-top: 100px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 50px;
+        }
+
+        .admin-box { 
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            max-width: 450px; 
+            margin: 20px auto; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px);
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
-        td, th {
-            border: 1px solid #444;
-            padding: 10px;
+
+        h2, h3 { color: var(--accent); text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: var(--input-bg);
+            color: white;
+            outline: none;
+            box-sizing: border-box;
         }
-        th {
-            background: #222;
+
+        button { 
+            width: 100%;
+            padding: 14px; 
+            background: var(--accent); 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            color: black;
+            margin-top: 15px;
+            transition: 0.3s;
         }
-        button {
-            padding: 6px 12px;
-            background: #d4af37;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
+
+        button:hover { background: white; transform: translateY(-2px); }
+
+        .taxi-list {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
-        input {
+
+        .taxi-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            position: relative;
+        }
+
+        .taxi-card p { margin: 5px 0; font-size: 14px; color: #ddd; }
+        .taxi-card strong { color: var(--accent); }
+        .taxi-card .time { position: absolute; top: 20px; right: 20px; font-size: 12px; color: #888; }
+        
+        .taxi-card button {
+            background: #ff4d4d;
+            color: white;
             padding: 8px;
-            width: 200px;
+            margin-top: 15px;
+            font-size: 12px;
+            width: auto;
         }
     </style>
 </head>
 <body>
 
-<h1>Адмін-панель Таксі</h1>
+<div class="video-bg">
+    <video autoplay muted loop playsinline>
+        <source src="video/video.mp4" type="video/mp4">
+    </video>
+</div>
 
-<label>Пароль:</label>
-<input type="password" id="pass">
-<button onclick="loadData()">Увійти</button>
+<nav>
+    <a href="/admin">← Авто-Каталог</a>
+    <div style="color: var(--accent); font-weight: bold; letter-spacing: 2px;">TAXI ADMIN</div>
+</nav>
 
-<table id="table" style="display:none;">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Ім'я</th>
-            <th>Телефон</th>
-            <th>Адреса</th>
-            <th>Коментар</th>
-            <th>Час</th>
-            <th>IP</th>
-            <th>Дія</th>
-        </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-</table>
+<div class="admin-container">
+
+    <div id="loginBox" class="admin-box">
+        <h3>Заявки на таксі</h3>
+        <input type="password" id="pass" placeholder="Введіть пароль">
+        <button onclick="loadData()">Увійти</button>
+    </div>
+
+    <div id="taxiPanel" style="display:none; width: 100%;">
+        <h2>Нові замовлення</h2>
+        <div id="taxiList" class="taxi-list"></div>
+    </div>
+
+</div>
 
 <script>
-async function loadData() {
-    const pass = document.getElementById("pass").value;
+    let CURRENT_PASS = "";
 
-    const res = await fetch(`/api/taxi/admin?pass=${pass}`);
-    if (!res.ok) {
-        alert("Невірний пароль");
-        return;
+    async function loadData() {
+        const passInput = document.getElementById("pass").value;
+        const btn = document.querySelector("#loginBox button");
+        btn.innerText = "Перевірка...";
+
+        try {
+            const res = await fetch(`/api/taxi/admin?pass=${passInput}`);
+            
+            if (!res.ok) {
+                alert("Невірний пароль!");
+                btn.innerText = "Увійти";
+                return;
+            }
+
+            CURRENT_PASS = passInput;
+            const data = await res.json();
+            
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("taxiPanel").style.display = "block";
+            
+            renderTaxi(data);
+        } catch (e) {
+            alert("Помилка з'єднання");
+            btn.innerText = "Увійти";
+        }
     }
 
-    const data = await res.json();
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
+    function renderTaxi(data) {
+        const list = document.getElementById("taxiList");
+        list.innerHTML = "";
 
-    data.forEach((item, i) => {
-        const tr = document.createElement("tr");
+        if(data.length === 0) {
+            list.innerHTML = "<p style='text-align:center; color:#888;'>Заявок поки немає.</p>";
+            return;
+        }
 
-        tr.innerHTML = `
-            <td>${i}</td>
-            <td>${item.name}</td>
-            <td>${item.phone}</td>
-            <td>${item.address}</td>
-            <td>${item.comment}</td>
-            <td>${item.time}</td>
-            <td>${item.ip}</td>
-            <td><button onclick="del(${i})">Видалити</button></td>
-        `;
+        data.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "taxi-card";
+            card.innerHTML = `
+                <div class="time">${item.time || 'Невідомо'}</div>
+                <p><strong>Ім'я:</strong> ${item.name}</p>
+                <p><strong>Телефон:</strong> ${item.phone}</p>
+                <p><strong>Адреса:</strong> ${item.address}</p>
+                <p><strong>Коментар:</strong> ${item.comment || '-'}</p>
+                <p style="font-size: 11px; color: #666;">IP: ${item.ip || 'Невідомо'}</p>
+                <button onclick="deleteTaxi('${item._id}')">Видалити заявку</button>
+            `;
+            list.appendChild(card);
+        });
+    }
 
-        tbody.appendChild(tr);
-    });
+    async function deleteTaxi(id) {
+        if (!confirm("Дійсно видалити цю заявку?")) return;
 
-    document.getElementById("table").style.display = "table";
-}
+        const res = await fetch("/api/taxi/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pass: CURRENT_PASS, id: id })
+        });
 
-async function del(index) {
-    const pass = document.getElementById("pass").value;
-
-    const res = await fetch("/api/taxi/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pass, index })
-    });
-
-    const msg = await res.text();
-    alert(msg);
-    loadData();
-}
+        if(res.ok) {
+            // Оновлюємо список
+            const updateRes = await fetch(`/api/taxi/admin?pass=${CURRENT_PASS}`);
+            const data = await updateRes.json();
+            renderTaxi(data);
+        } else {
+            alert("Помилка видалення!");
+        }
+    }
 </script>
 
 </body>
